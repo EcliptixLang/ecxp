@@ -23,5 +23,6 @@ class Interpreter {
     std::shared_ptr<Values::Runtime> IWhen(std::shared_ptr<AST::ExprAST>& astNode, Environment& env);
     std::shared_ptr<Values::Runtime> IIf(std::shared_ptr<AST::ExprAST>& astNode, Environment& env);
     std::shared_ptr<Values::Runtime> IEqu(std::shared_ptr<AST::ExprAST>& astNode, Environment& env);
+    std::shared_ptr<Values::Runtime> IClass(std::shared_ptr<AST::ExprAST>& astNode, Environment& env);
     std::shared_ptr<Values::Runtime> evaluate(std::shared_ptr<AST::ExprAST>& astNode, Environment& env);
 };

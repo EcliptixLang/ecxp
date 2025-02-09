@@ -47,6 +47,8 @@ std::shared_ptr<Values::Runtime> Interpreter::evaluate(std::shared_ptr<AST::Expr
 				return ICall(astNode, env);
 			case Nodes::String:
 				return IString(astNode);
+			case Nodes::Class:
+				return IClass(astNode, env);
 			case Nodes::Identifier:
 				return IIdent(astNode, env);
 			case Nodes::Number:

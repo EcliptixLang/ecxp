@@ -1,211 +1,236 @@
 #include <ENV.hpp>
 #include <FunctionValues.hpp>
+#include <Values.hpp>
+#include <Interpreter.hpp>
 #include <winutils.hpp>
 #include <raylib/raylib.h>
 
 using Nodes = AST::Nodes; 
 using string = std::string;
+using Values::Null;
+using Values::Number;
+using Values::Boolean;
+using Values::Object;
+using Values::String;
+#define RuntimeVal std::shared_ptr<Values::Runtime>
 
-std::shared_ptr<Values::Runtime> fipos(std::vector<std::shared_ptr<Values::Runtime>> args, Environment& env){
-    if (args[0]->type() != "number" || args[1]->type() != "number"){
-        DisplayErrorMessageBox("showFPS(x, y) Errored out: one of its values is not a number.");
-        exit(1);
+template <typename T>
+std::shared_ptr<T> createValue(T thing){
+	return std::make_shared<T>(thing);
+}
+
+#ifndef _NORAYLIB
+RuntimeVal ECLIPTIX_RunGameLoop(FunctionCallback* callback){
+    Interpreter intr;
+    if(callback->parsedArgs[0]->type() == "function")
+        while(!WindowShouldClose()){
+            BeginDrawing();
+
+            for(auto& thing : dynamic_cast<Values::Function*>(callback->parsedArgs[0].get())->body){
+                intr.evaluate(thing, *callback->env);
+            }
+
+            EndDrawing();
+        }
+    return createNull();
+}
+
+void ECLIPTIX_CustomLog(int msgType, const char *text, va_list args){}
+void LogExit(std::string errorname, int exitCode = 0){
+    std::cout << errorname << "\n";
+    exit(exitCode);
+}
+
+RuntimeVal ECLIPTIX_ShowFPS(FunctionCallback* callback){
+    auto args = callback->parsedArgs;
+    if (!ValType(args[0], "number") || !ValType(args[1], "number")){
+        LogExit(callback->name.append(" Errored out: one of its values is not a number.").c_str(), 1);
     }
 
-    Values::Number *a = dynamic_cast<Values::Number*>(args[0].get());
-    Values::Number *b = dynamic_cast<Values::Number*>(args[1].get()); 
+    Number *a = switchNumber(args[0]);
+    Number *b = switchNumber(args[1]);
     
     DrawFPS(a->value, b->value);
 
-    return std::make_shared<Values::Null>();
+    return createNull();
 }
 
-std::shared_ptr<Values::Runtime> shudclose(std::vector<std::shared_ptr<Values::Runtime>> args, Environment& env){
-    return std::make_shared<Values::Boolean>(!WindowShouldClose());
-}
-void CustomLog(int msgType, const char *text, va_list args)
-{ 
-  return;
-}
-std::shared_ptr<Values::Runtime> cretwindow(std::vector<std::shared_ptr<Values::Runtime>> args, Environment& env){
-    SetTraceLogCallback(CustomLog);
-    InitWindow(800, 600, "Test");
-    return std::make_shared<Values::Null>();
+RuntimeVal ECLIPTIX_Running(FunctionCallback* callback){
+    return createValue<Boolean>(Boolean(!WindowShouldClose()));
 }
 
-std::shared_ptr<Values::Runtime> rmwindow(std::vector<std::shared_ptr<Values::Runtime>> args, Environment& env){
+
+
+RuntimeVal ECLIPTIX_CloseWindow(FunctionCallback* callback){
     CloseWindow();
-    return std::make_shared<Values::Null>();
+    return createNull();
 }
 
-std::shared_ptr<Values::Runtime> startdrawing(std::vector<std::shared_ptr<Values::Runtime>> args, Environment& env){
+RuntimeVal ECLIPTIX_StartDrawing(FunctionCallback* callback){
     BeginDrawing();
     ClearBackground(BLACK);
-    return std::make_shared<Values::Null>();
+    return createNull();
 }
 
-std::shared_ptr<Values::Runtime> stopdrawing(std::vector<std::shared_ptr<Values::Runtime>> args, Environment& env){
+RuntimeVal ECLIPTIX_EndDrawing(FunctionCallback* callback){
     EndDrawing();
-    return std::make_shared<Values::Null>();
+    return createNull();
 }
 
-std::shared_ptr<Values::Runtime> tringol(std::vector<std::shared_ptr<Values::Runtime>> args, Environment& env){
-    if (args[0]->type() != "object" || args[1]->type() != "object" || args[1]->type() != "object" || args[1]->type() != "object"){
-        DisplayErrorMessageBox("drawTriangle(o1, o2, o3, c) Errored out: one of its values is not an object.");
-        exit(1);
+RuntimeVal ECLIPTIX_DrawTriangle(FunctionCallback* callback){
+    auto args = callback->parsedArgs;
+    if (!ValType(args[0], "object") || !ValType(args[1], "object") || !ValType(args[2], "object") || !ValType(args[3], "object")){
+        callback->Errorout(", one of its values is not an object.", 1);
     }
 
-    Values::Object *a = dynamic_cast<Values::Object*>(args[0].get());
-    Values::Object *b = dynamic_cast<Values::Object*>(args[1].get());
-    Values::Object *c = dynamic_cast<Values::Object*>(args[2].get());
-    Values::Object *d = dynamic_cast<Values::Object*>(args[3].get());
+    Object *a = switchObject(args[0]);
+    Object *b = switchObject(args[1]);
+    Object *c = switchObject(args[2]);
+    Object *d = switchObject(args[3]);
 
-    if(a->props["x"] == nullptr || a->props["y"] == nullptr){
-        DisplayErrorMessageBox("drawTriangle(o1, o2, o3, c) Errored out: Point One of triangle is null.");
-        exit(1);
-    }
-    if(b->props["x"] == nullptr || b->props["y"] == nullptr){
-        DisplayErrorMessageBox("drawTriangle(o1, o2, o3, c) Errored out: Point Two of triangle is null.");
-        exit(1);
-    }
-    if(c->props["x"] == nullptr || c->props["y"] == nullptr){
-        DisplayErrorMessageBox("drawTriangle(o1, o2, o3, c) Errored out: Point Three of triangle is null.");
-        exit(1);
-    }
-    if(d->props["r"] == nullptr || d->props["g"] == nullptr || d->props["b"] == nullptr){
-        DisplayErrorMessageBox("drawTriangle(o1, o2, o3, c) Errored out: Color of triangle is null.");
-        exit(1);
+    if(hasNullObjects({"x", "y"}, a->props) 
+        || hasNullObjects({"x", "y"}, b->props) 
+        || hasNullObjects({"x", "y"}, c->props)
+        || hasNullObjects({"r", "g", "b"}, d->props)
+        ) { 
+        callback->Errorout("One of the objects given are null.");
     }
 
-    if(a->props["x"]->type() != "number" || a->props["y"]->type() != "number"){
-        DisplayErrorMessageBox("drawTriangle(o1, o2, o3, c) Errored out: a point on o1 is not a number.");
-        exit(1);
-    }
-    if(b->props["x"]->type() != "number" || b->props["y"]->type() != "number"){
-        DisplayErrorMessageBox("drawTriangle(o1, o2, o3, c) Errored out: a point on o2 is not a number.");
-        exit(1);
-    }
-    if(c->props["x"]->type() != "number" || c->props["y"]->type() != "number"){
-        DisplayErrorMessageBox("drawTriangle(o1, o2, o3, c) Errored out: a point on o3 is not a number.");
-        exit(1);
-    }
-    if(d->props["r"]->type() != "number" || d->props["g"]->type() != "number" || d->props["b"]->type() != "number"){
-        DisplayErrorMessageBox("drawTriangle(o1, o2, o3, c) Errored out: a point on c is is not a number.");
-        exit(1);
+    if(!ValType(a->props["x"], "number") || !ValType(a->props["y"], "number") 
+        || !ValType(b->props["x"], "number") || !ValType(b->props["y"], "number") 
+        || !ValType(c->props["x"], "number") || !ValType(c->props["y"], "number")
+        || !ValType(d->props["r"], "number") || !ValType(d->props["g"], "number") || !ValType(d->props["b"], "number")
+        ) {
+        LogExit("drawTriangle(o1, o2, o3, c) Errored out: a point on c is is not a number.", 1);
     }
 
-    Values::Number *a1 = dynamic_cast<Values::Number*>(a->props["x"].get());
-    Values::Number *b1 = dynamic_cast<Values::Number*>(a->props["y"].get());
+    Number *a1 = switchNumber(a->props["x"]);
+    Number *b1 = switchNumber(a->props["y"]);
+    Number *a2 = switchNumber(b->props["x"]);
+    Number *b2 = switchNumber(b->props["y"]);
+    Number *a3 = switchNumber(c->props["x"]);
+    Number *b3 = switchNumber(c->props["y"]);
+    Number *ac = switchNumber(d->props["r"]);
+    Number *bc = switchNumber(d->props["g"]);
+    Number *cc = switchNumber(d->props["b"]);
+
     Vector2 v1 = { (float)a1->value, (float)b1->value };
-    Values::Number *a2 = dynamic_cast<Values::Number*>(b->props["x"].get());
-    Values::Number *b2 = dynamic_cast<Values::Number*>(b->props["y"].get());
     Vector2 v2 = { (float)a2->value, (float)b2->value };
-
-    Values::Number *a3 = dynamic_cast<Values::Number*>(c->props["x"].get());
-    Values::Number *b3 = dynamic_cast<Values::Number*>(c->props["y"].get());
     Vector2 v3 = { (float)a3->value, (float)b3->value };
-
-    Values::Number *ac = dynamic_cast<Values::Number*>(d->props["r"].get());
-    Values::Number *bc = dynamic_cast<Values::Number*>(d->props["g"].get());
-    Values::Number *cc = dynamic_cast<Values::Number*>(d->props["b"].get());
     Color c1 = { (unsigned char)ac->value, (unsigned char)bc->value, (unsigned char)cc->value, 255 };
     DrawTriangle(v1, v2, v3, c1);
 
-    return std::make_shared<Values::Null>();
+    return createNull();
 }
 
-std::shared_ptr<Values::Runtime> sqare(std::vector<std::shared_ptr<Values::Runtime>> args, Environment& env){
-    if (args[0]->type() != "object" || args[1]->type() != "object"){
-        DisplayErrorMessageBox("drawRectangle(rec, col) Errored out: one of its values is not an object.");
-        exit(1);
+RuntimeVal ECLIPTIX_DrawRect(FunctionCallback* callback){
+    auto args = callback->parsedArgs;
+    if (!ValType(args[0], "object") || !ValType(args[1], "object")){
+        callback->Errorout("one of its values is not an object.");
     }
 
-    std::cout << "init\n";
-    Values::Object *a = dynamic_cast<Values::Object*>(args[0].get());
-    Values::Object *b = dynamic_cast<Values::Object*>(args[1].get());
-    std::cout << "checks\n";
+    Object *a = switchObject(args[0]);
+    Object *b = switchObject(args[1]);
 
-    if(a->props["x"] == nullptr || a->props["y"] == nullptr || a->props["width"] == nullptr || a->props["height"] == nullptr){
-        DisplayErrorMessageBox("drawRectangle(rec, col) Errored out: Rectangle object is null (or is missing something*).\n rec: { x, y, width, height }");
-        exit(1);
+    if(hasNullObjects({"x", "y", "width", "height"}, a->props)){
+        callback->Errorout("Rectangle object is null (or is missing something*).\n rec: { x, y, width, height }");
     }
-    if(b->props["r"] == nullptr || b->props["g"] == nullptr || b->props["b"] == nullptr){
-        DisplayErrorMessageBox("drawRectangle(rec, col) Errored out: Color of Rectangle is null (or badly formatted*).\n col: { r, g, b }");
-        exit(1);
+    if(hasNullObjects({"r", "g", "b"}, b->props)){
+        callback->Errorout("Color of Rectangle is null (or badly formatted*).\n col: { r, g, b }");
     }
 
-    if(a->props["x"]->type() != "number" || a->props["y"]->type() != "number" || a->props["height"]->type() != "number" || a->props["width"]->type() != "number"){
-        DisplayErrorMessageBox("drawRectangle(rec, col) Errored out: a point on rec is not a number.");
-        exit(1);
-    }
-    if(b->props["r"]->type() != "number" || b->props["g"]->type() != "number" || b->props["b"]->type() != "number"){
+    if(!ValType(a->props["x"], "number") 
+        || !ValType(a->props["y"], "number") 
+        || !ValType(a->props["height"], "number") 
+        || !ValType(a->props["width"], "number") 
+        || !ValType(b->props["r"], "number") 
+        || !ValType(b->props["g"], "number") 
+        || !ValType(b->props["b"], "number")
+    ) {
         DisplayErrorMessageBox("drawRectangle(rec, col) Errored out: a point on col is is not a number.");
         exit(1);
     }
 
-    Values::Number *a1 = dynamic_cast<Values::Number*>(a->props["x"].get());
-    Values::Number *b1 = dynamic_cast<Values::Number*>(a->props["y"].get());
-    Values::Number *c1 = dynamic_cast<Values::Number*>(a->props["width"].get());
-    Values::Number *d1 = dynamic_cast<Values::Number*>(a->props["height"].get());
-    std::cout << "Rec\n";
+    Number *a1 = switchNumber(a->props["x"]);
+    Number *b1 = switchNumber(a->props["y"]);
+    Number *c1 = switchNumber(a->props["width"]);
+    Number *d1 = switchNumber(a->props["height"]);
     Rectangle rec = { (float)a1->value, (float)b1->value, (float)c1->value, (float)d1->value };
 
-    Values::Number *ac = dynamic_cast<Values::Number*>(b->props["r"].get());
-    Values::Number *bc = dynamic_cast<Values::Number*>(b->props["g"].get());
-    Values::Number *cc = dynamic_cast<Values::Number*>(b->props["b"].get());
-    std::cout << "col\n";
+    Number *ac = switchNumber(b->props["r"]);
+    Number *bc = switchNumber(b->props["g"]);
+    Number *cc = switchNumber(b->props["b"]);
     Color co = { (unsigned char)ac->value, (unsigned char)bc->value, (unsigned char)cc->value, 255 };
-    
-    std::cout << "Draw\n";
     DrawRectangleRec(rec, co);
 
-    return std::make_shared<Values::Null>();
+    return createNull();
 }
 
-std::shared_ptr<Values::Runtime> sqarerond(std::vector<std::shared_ptr<Values::Runtime>> args, Environment& env){
-    if (args[0]->type() != "object" || args[1]->type() != "object" || args[2]->type() != "number"){
-        DisplayErrorMessageBox("drawRectangleRound(rec, col, roundness) Errored out: one of its values is not an object.");
-        exit(1);
+RuntimeVal ECLIPTIX_DrawRectRounded(FunctionCallback* callback){
+    auto args = callback->parsedArgs;
+    if (!ValType(args[0], "object") || !ValType(args[1], "object") || !ValType(args[2], "number")){
+        callback->Errorout("one of its values is not an object.");
     }
 
-    Values::Object *a = dynamic_cast<Values::Object*>(args[0].get());
-    Values::Object *b = dynamic_cast<Values::Object*>(args[1].get());
-    Values::Number *rou = dynamic_cast<Values::Number*>(args[2].get());
+    Object *a = switchObject(args[0]);
+    Object *b = switchObject(args[1]);
+    Number *rou = switchNumber(args[2]);
 
-    if(a->props["x"] == nullptr || a->props["y"] == nullptr || a->props["width"] == nullptr || a->props["height"] == nullptr){
-        DisplayErrorMessageBox("drawRectangleRound(rec, col, roundness) Errored out: Rectangle object is null (or is missing something*).\n rec: { x, y, width, height }");
-        exit(1);
+    if(hasNullObjects({ "x", "y", "width", "height" }, a->props)){
+        callback->Errorout("Rectangle object is null (or is missing something*).\n rec: { x, y, width, height }");
     }
-    if(b->props["r"] == nullptr || b->props["g"] == nullptr || b->props["b"] == nullptr){
-        DisplayErrorMessageBox("drawRectangleRound(rec, col, roundness) Errored out: Color of Rectangle is null (or badly formatted*).\n col: { r, g, b }");
-        exit(1);
+    if(hasNullObjects({"r", "g", "b"}, b->props)){
+        callback->Errorout("Color of Rectangle is null (or badly formatted*).\n col: { r, g, b }");
     }
 
-    if(a->props["x"]->type() != "number" || a->props["y"]->type() != "number" || a->props["height"]->type() != "number" || a->props["width"]->type() != "number"){
-        DisplayErrorMessageBox("drawRectangleRound(rec, col, roundness) Errored out: a point on rec is not a number.");
-        exit(1);
+    if(!ValType(a->props["x"], "number") || !ValType(a->props["y"], "number") 
+        || !ValType(a->props["height"], "number") || a->props["width"]->type() != "number"){
+        callback->Errorout("a point on rec is not a number.");
     }
-    if(b->props["r"]->type() != "number" || b->props["g"]->type() != "number" || b->props["b"]->type() != "number"){
-        DisplayErrorMessageBox("drawRectangleRound(rec, col, roundness) Errored out: a point on col is is not a number.");
-        exit(1);
+    if(!ValType(b->props["r"], "number") || !ValType(b->props["g"], "number") || !ValType(b->props["b"], "number")){
+        callback->Errorout("a point on col is is not a number.");
     }
 
-    Values::Number *a1 = dynamic_cast<Values::Number*>(a->props["x"].get());
-    Values::Number *b1 = dynamic_cast<Values::Number*>(a->props["y"].get());
-    Values::Number *c1 = dynamic_cast<Values::Number*>(a->props["width"].get());
-    Values::Number *d1 = dynamic_cast<Values::Number*>(a->props["height"].get());
+    Number *a1 = switchNumber(a->props["x"]);
+    Number *b1 = switchNumber(a->props["y"]);
+    Number *c1 = switchNumber(a->props["width"]);
+    Number *d1 = switchNumber(a->props["height"]);
     Rectangle rec = { (float)a1->value, (float)b1->value, (float)c1->value, (float)d1->value };
 
-    Values::Number *ac = dynamic_cast<Values::Number*>(b->props["r"].get());
-    Values::Number *bc = dynamic_cast<Values::Number*>(b->props["g"].get());
-    Values::Number *cc = dynamic_cast<Values::Number*>(b->props["b"].get());
+    Number *ac = switchNumber(b->props["r"]);
+    Number *bc = switchNumber(b->props["g"]);
+    Number *cc = switchNumber(b->props["b"]);
     Color co = { (unsigned char)ac->value, (unsigned char)bc->value, (unsigned char)cc->value, 255 };
     DrawRectangleRounded(rec, rou->value, rou->value, co);
 
-    return std::make_shared<Values::Null>();
+    return createNull();
 }
 
-std::shared_ptr<Values::Runtime> thing(std::vector<std::shared_ptr<Values::Runtime>> args, Environment& env){
+RuntimeVal ECLIPTIX_CreateWindow(FunctionCallback* callback){
+    SetTraceLogCallback(ECLIPTIX_CustomLog);
+    InitWindow(800, 600, "Test");
+
+    std::map<std::string, RuntimeVal> Window;
+    std::map<std::string, RuntimeVal> Draw;
+    std::map<std::string, RuntimeVal> Debug;
+    Debug["showFPS"] = std::make_shared<NativeFN>(ECLIPTIX_ShowFPS);
+    
+    Draw["Triangle"] =  std::make_shared<NativeFN>(ECLIPTIX_DrawTriangle);
+    Draw["Rectangle"] = std::make_shared<NativeFN>(ECLIPTIX_DrawRect);
+    Draw["RectangleRounded"] =  std::make_shared<NativeFN>(ECLIPTIX_DrawRectRounded);
+    
+    Window["destroy"] = std::make_shared<NativeFN>(ECLIPTIX_CloseWindow);
+    Window["draw"] = std::make_shared<Values::Object>(Draw);
+    Window["debug"] = std::make_shared<Values::Object>(Debug);
+    Window["running"] = std::make_shared<NativeFN>(ECLIPTIX_Running);
+    Window["run"] = std::make_shared<NativeFN>(ECLIPTIX_RunGameLoop);
+
+    return std::make_shared<Values::Object>(Window);
+}
+#endif
+
+RuntimeVal ECLIPTIX_Log(FunctionCallback* callback){
+    auto args = callback->parsedArgs;
     std::string value = "";
     
     for(auto& arg : args){
@@ -218,10 +243,11 @@ std::shared_ptr<Values::Runtime> thing(std::vector<std::shared_ptr<Values::Runti
 
     std::cout << value << "\n";
 
-    return std::make_shared<Values::Null>(Values::Null());
+    return createNull();
 }
 
-std::shared_ptr<Values::Runtime> thingn(std::vector<std::shared_ptr<Values::Runtime>> args, Environment& env){
+RuntimeVal ECLIPTIX_LogNNL(FunctionCallback* callback){
+    auto args = callback->parsedArgs;
     std::string value = "";
     
     for(auto& arg : args){
@@ -234,42 +260,50 @@ std::shared_ptr<Values::Runtime> thingn(std::vector<std::shared_ptr<Values::Runt
 
     std::cout << value;
 
-    return std::make_shared<Values::Null>(Values::Null());
+    return createNull();
 }
 
-std::shared_ptr<Values::Runtime> ask(std::vector<std::shared_ptr<Values::Runtime>> args, Environment& env){
-    thingn(std::move(args), env);
-    std::string ans;
-    std::cin >> ans;
+RuntimeVal ECLIPTIX_Ask(FunctionCallback* callback){
+    std::cout << callback->parsedArgs[0]->stringValue();
     
-    return std::make_shared<Values::String>(Values::String(ans));
+    std::string ans_s;
+    
+    int ans_n;
+
+    if (callback->parsedArgs[1]->stringValue() == "number")
+        std::cin >> ans_n;
+    else
+        std::cin >> ans_s;
+    
+    if (callback->parsedArgs[1]->stringValue() == "number")
+        return createValue<Number>(Values::Number(ans_n));
+    else
+        return createValue<String>(Values::String(ans_s));
 }
 
-std::shared_ptr<Values::Runtime> _throw(std::vector<std::shared_ptr<Values::Runtime>> args, Environment& env){
+RuntimeVal ECLIPTIX_Throw(FunctionCallback* callback){
     std::cout << "Error:\n- Code: 8\n- Description: ";
-    thing(std::move(args), env);
+    ECLIPTIX_Log(callback);
     exit(8);
 
-    return std::make_shared<Values::Null>(Values::Null());
+    return createNull();
 }
 
-std::shared_ptr<Values::Runtime> readFile(std::vector<std::shared_ptr<Values::Runtime>> args, Environment& env){
-    if(args[0].get() == nullptr){
+RuntimeVal ECLIPTIX_ReadFile(FunctionCallback* callback){
+    auto args = callback->parsedArgs;
+    if(ValType(args[0], nullptr)){
         std::cout << "Cannot read null\n";
         exit(6);
     }
 
     std::string filecont = Utilities::readFile(args[0]->stringValue());
 
-    return std::make_shared<Values::String>(Values::String(filecont));
+    return createValue<String>(Values::String(filecont));
 }
 
-std::shared_ptr<Values::Runtime> writeFile(std::vector<std::shared_ptr<Values::Runtime>> args, Environment& env){
-    if(args[0]->type() != "string"){
-        std::cout << "Cannot read a non string\n";
-        exit(6);
-    }
-    if(args[1]->type() != "string"){
+RuntimeVal ECLIPTIX_WriteFile(FunctionCallback* callback){
+    auto args = callback->parsedArgs;
+    if(!ValType(args[0], "string") && !ValType(args[1], "string")){
         std::cout << "Cannot read a non string\n";
         exit(6);
     }
@@ -279,27 +313,30 @@ std::shared_ptr<Values::Runtime> writeFile(std::vector<std::shared_ptr<Values::R
     return std::make_shared<Values::Null>(Values::Null());
 }
 
-std::shared_ptr<Values::Runtime> holt(std::vector<std::shared_ptr<Values::Runtime>> args, Environment& env){
+RuntimeVal ECLIPTIX_Wait(FunctionCallback* callback){
+    auto args = callback->parsedArgs;
     if(args[0]->type() != "number"){
         std::cout << "Cannot read a non number\n";
         exit(6);
     }
 
-    sleep(dynamic_cast<Values::Number*>(args[0].get())->value * 1000);
+    sleep(switchNumber(args[0])->value);
 
-    return std::make_shared<Values::Null>(Values::Null());
+    return createNull();
 }
 
-std::shared_ptr<Values::Runtime> exeet(std::vector<std::shared_ptr<Values::Runtime>> args, Environment& env){
+RuntimeVal ECLIPTIX_Exit(FunctionCallback* callback){
+    auto args = callback->parsedArgs;
     if(args[0]->type() != "number"){
         std::cout << "Cannot read a non number\n";
         exit(6);
     }
 
-    exit(dynamic_cast<Values::Number*>(args[0].get())->value);
+    exit(switchNumber(args[0])->value);
 }
 
-std::shared_ptr<Values::Runtime> errout(std::vector<std::shared_ptr<Values::Runtime>> args, Environment& env){
+RuntimeVal ECLIPTIX_ErrLog(FunctionCallback* callback){
+    auto args = callback->parsedArgs;
     std::string value = "";
     
     for(auto& arg : args){
@@ -312,40 +349,33 @@ std::shared_ptr<Values::Runtime> errout(std::vector<std::shared_ptr<Values::Runt
 
     std::cerr << value << "\n";
 
-    return std::make_shared<Values::Null>(Values::Null());
+    return createNull();
 }
 
-std::map<std::string, std::shared_ptr<Values::Runtime>> ErrorStuff;
-std::map<std::string, std::shared_ptr<Values::Runtime>> ConsoleStuff;
-std::map<std::string, std::shared_ptr<Values::Runtime>> FileStuff;
-std::map<std::string, std::shared_ptr<Values::Runtime>> ProcessStuff;
-std::map<std::string, std::shared_ptr<Values::Runtime>> ProjectStuff;
-std::map<std::string, std::shared_ptr<Values::Runtime>> AppStuff;
+
+std::map<std::string, RuntimeVal> ErrorStuff;
+std::map<std::string, RuntimeVal> ConsoleStuff;
+std::map<std::string, RuntimeVal> FileStuff;
+std::map<std::string, RuntimeVal> ProcessStuff;
+std::map<std::string, RuntimeVal> ProjectStuff;
 
 void Environment::setup(){
-    ErrorStuff["throw"]      =  std::make_shared<NativeFN>(NativeFN(_throw));
-    ErrorStuff["out"]        =  std::make_shared<NativeFN>(NativeFN(errout));
-	ConsoleStuff["out"]      =  std::make_shared<NativeFN>(NativeFN(thing));
-    ConsoleStuff["ask"]      =  std::make_shared<NativeFN>(NativeFN(ask));
-	FileStuff["read"]        =  std::make_shared<NativeFN>(NativeFN(readFile));
-    FileStuff["write"]       =  std::make_shared<NativeFN>(NativeFN(writeFile));
-    ProcessStuff["exit"]     =  std::make_shared<NativeFN>(NativeFN(exeet));
-    ProcessStuff["wait"]     =  std::make_shared<NativeFN>(NativeFN(holt));
-    AppStuff["showFPS"]      =  std::make_shared<NativeFN>(fipos);
-    AppStuff["drawTriangle"] =  std::make_shared<NativeFN>(tringol);
-    AppStuff["drawRect"] =  std::make_shared<NativeFN>(sqare);
-    AppStuff["drawRectRounded"] =  std::make_shared<NativeFN>(sqarerond);
-    AppStuff["createWindow"] =  std::make_shared<NativeFN>(cretwindow);
-    AppStuff["deleteWindow"] =  std::make_shared<NativeFN>(rmwindow);
-    AppStuff["running"]      =  std::make_shared<NativeFN>(shudclose);
-    AppStuff["startDrawing"] =  std::make_shared<NativeFN>(startdrawing);
-    AppStuff["endDrawing"]   =  std::make_shared<NativeFN>(stopdrawing);
+    ErrorStuff["throw"]      =  std::make_shared<NativeFN>(ECLIPTIX_Throw);
+    ErrorStuff["out"]        =  std::make_shared<NativeFN>(ECLIPTIX_ErrLog);
+	ConsoleStuff["out"]      =  std::make_shared<NativeFN>(ECLIPTIX_Log);
+    ConsoleStuff["ask"]      =  std::make_shared<NativeFN>(ECLIPTIX_Ask);
+	FileStuff["read"]        =  std::make_shared<NativeFN>(ECLIPTIX_ReadFile);
+    FileStuff["write"]       =  std::make_shared<NativeFN>(ECLIPTIX_WriteFile);
+    ProcessStuff["exit"]     =  std::make_shared<NativeFN>(ECLIPTIX_Exit);
+    ProcessStuff["wait"]     =  std::make_shared<NativeFN>(ECLIPTIX_Wait);
 
 	this->setVariableSafe("error", std::make_shared<Values::Object>(Values::Object(ErrorStuff)), true);
 	this->setVariableSafe("console", std::make_shared<Values::Object>(Values::Object(ConsoleStuff)), true);
 	this->setVariableSafe("file", std::make_shared<Values::Object>(Values::Object(FileStuff)), true);
     this->setVariableSafe("process", std::make_shared<Values::Object>(Values::Object(ProcessStuff)), true);
-    this->setVariableSafe("app", std::make_shared<Values::Object>(AppStuff), true);
+    #ifndef _NORAYLIB
+        this->setVariableSafe("Window", std::make_shared<NativeFN>(ECLIPTIX_CreateWindow), true);
+    #endif
 	this->setVariableSafe("null", std::make_shared<Values::Null>(Values::Null()), true);
 	this->setVariableSafe("true", std::make_shared<Values::Boolean>(Values::Boolean(true)), true);
 	this->setVariableSafe("false", std::make_shared<Values::Boolean>(Values::Boolean(false)), true);

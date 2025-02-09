@@ -22,12 +22,14 @@ class Parser {
         Lexer::Token expectOne(Lexer::TokenType type1, Lexer::TokenType type2);
 
         std::shared_ptr<AST::ExprAST> ParseStatement();
+        std::shared_ptr<AST::ExprAST> ParseClassStatement();
+        std::shared_ptr<AST::ExprAST> ParseClass();
         std::shared_ptr<AST::ExprAST> parseWhen();
         std::shared_ptr<AST::ExprAST> parseWhile();
-        std::shared_ptr<AST::ExprAST> parseComments();
         std::shared_ptr<AST::ExprAST> parseIf();
         std::shared_ptr<AST::ExprAST> parseFunctions();
         std::shared_ptr<AST::ExprAST> parseVariables();
+        std::shared_ptr<AST::ExprAST> parseNew();
         std::shared_ptr<AST::ExprAST> parseAssignment();
         std::shared_ptr<AST::ExprAST> parseArrays();
         std::shared_ptr<AST::ExprAST> parseDSNotation();

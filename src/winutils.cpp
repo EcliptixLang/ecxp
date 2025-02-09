@@ -1,12 +1,19 @@
-#include <windows.h>
+#ifdef _WIN32
+    #include <windows.h>
+#else
+    #include <unistd.h>
+#endif
 #include <string>
 #include <ENV.hpp>
 #include <iostream>
 #include <filesystem>
 #include <functional>
-/*#include <FunctionValues.hpp>
+#include <FunctionValues.hpp>
 #include <winutils.hpp>
+#include <chrono>
+#include <thread>
 
+/*
 void ModuleLoader::loadModule(const std::string& modulePath, Environment& env) {
         HMODULE hModule = LoadLibraryA(modulePath.c_str());
         if (!hModule) {
@@ -40,18 +47,29 @@ void ModuleLoader::loadModule(const std::string& modulePath, Environment& env) {
 }*/
 
 std::string GetExecutablePath() {
+    #ifndef _WIN32
+        return "";
+    #else
     char path[MAX_PATH];
     GetModuleFileNameA(NULL, path, MAX_PATH);
     return std::string(path);
+    #endif
 }
 
 std::string GetExecutableDirectory() {
+    #ifndef _WIN32
+        return "";
+    #else
     std::string path = GetExecutablePath();
     size_t pos = path.find_last_of("\\/");
     return (std::string::npos == pos) ? "" : path.substr(0, pos);
+    #endif
 }
 Environment IncludeLIB(std::string lib, Environment &env){
     Environment enve(std::move(env));
+    #ifndef _WIN32
+        return enve;
+    #else
     HMODULE hModule = LoadLibraryA(lib.c_str());
     if (!hModule) {
         DWORD errorMessageID = ::GetLastError();
@@ -85,9 +103,13 @@ Environment IncludeLIB(std::string lib, Environment &env){
     }*/
 
     return enve;
+    #endif
 }
 
 std::vector<std::string> getDLLs(){
+    #ifndef _WIN32
+        return std::vector<std::string>();
+    #else
     std::vector<std::string> dlls{};
     std::string exeDir = GetExecutableDirectory();
     
@@ -98,9 +120,13 @@ std::vector<std::string> getDLLs(){
     }
 
     return dlls;
+    #endif
 }
 
 int DisplayErrorMessageBox(const char* error) {
+    #ifndef _WIN32
+        return 0;
+    #else
     int msgboxID = MessageBoxA(
         NULL,
         error,
@@ -114,14 +140,19 @@ int DisplayErrorMessageBox(const char* error) {
     }
 
     return msgboxID;    
+    #endif
 }
 
 wchar_t * convertCharArrayToLPCWSTR(const char* charArray){
+    #ifndef _WIN32
+        return L"";
+    #else
     wchar_t* wString=new wchar_t[4096];
     MultiByteToWideChar(CP_ACP, 0, charArray, -1, wString, 4096);
     return wString;
+    #endif
 }
 
-void sleep(int idk){
-    Sleep(idk);
+void sleep(double idk){
+    std::this_thread::sleep_for(std::chrono::duration<double>(idk));
 }

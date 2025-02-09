@@ -43,7 +43,11 @@ int main(int argc, char* argv[]){
         "clang++ dll.cpp -shared -o std.dll -L./lib -lecx -I./includes -DBUILDING_DLL"
     };
     std::vector<std::string> exec{
-        "g++ src/*.cpp src/evaluation/*.cpp -o idk.exe -L. -L./lib -I./includes -std=c++17 -ltomlcpp -lraylib -lgdi32 -lwinmm -fno-elide-constructors"
+        #ifdef _WIN32
+            "g++ src/*.cpp src/evaluation/*.cpp -o idk.exe -L. -L./lib -I./includes -std=c++17 -ltomlcpp -lraylib -lgdi32 -lwinmm -fno-elide-constructors"
+        #else
+            "g++ src/*.cpp src/evaluation/*.cpp -o idk.out -L. -L./lib -I./includes -std=c++17 -ltomlcppL --define  _NORAYLIB -fno-elide-constructors"
+        #endif
     };
 
     if(argv[1] == "dll"){

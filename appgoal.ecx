@@ -1,0 +1,19 @@
+Object window = new Window()
+
+Number i = 255
+lock Object point1 = { x: 45, y: 200}
+lock Object point2 = { x: 180, y: 60}
+lock Object point3 = { x: 30, y: 40 }
+
+String Loopii(){
+    i = i - 1
+    window.draw.Rectangle({ x: 0, y: 0, width: 800, height: 600 }, { r: 255, g: 255, b: 255 })
+    window.debug.showFPS(20, 20)
+    window.draw.Triangle(point1, point2, point3, { r: i, g: 0, b: 0})
+
+    window.draw.RectangleRounded({ x: 170, y: 90, width: 69, height: 99 }, { r: i, g: 0, b: 0}, 70)
+}
+
+window.run(Loopii)
+
+window.destroy()

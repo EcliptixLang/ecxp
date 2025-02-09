@@ -29,7 +29,9 @@ namespace AST {
     Member, 
     Equality,
     Break,
-    Return
+    New,
+    Return,
+    Class
   };
 
   std::string stringifyAST(Nodes type);
@@ -397,6 +399,45 @@ namespace AST {
         }
         std::shared_ptr<ExprAST> clone() const override {
           return std::make_shared<Skip>(Skip());
+        }
+    };
+
+    class Class : public ExprAST {
+      public:
+      std::string name;
+      std::string parent;
+      std::vector<std::shared_ptr<ExprAST>> body;
+      Class(
+        std::string name,
+        std::vector<std::shared_ptr<ExprAST>> body,
+        std::string parent
+      ):
+        name(name),
+        body(body),
+        parent(parent){}
+        
+      Nodes getType() const override {
+        return Nodes::Class;
+      }
+      std::shared_ptr<ExprAST> clone() const override {
+        return std::make_shared<Class>(Class(name, body, parent));
+      } 
+    };
+
+    class NewExpr : public ExprAST {
+    public:
+        std::string className;
+        std::vector<std::shared_ptr<ExprAST>> arguments;
+
+        NewExpr(std::string className, std::vector<std::shared_ptr<ExprAST>> arguments) 
+            : className(className), arguments(arguments) {}
+
+        Nodes getType() const override {
+            return Nodes::New;
+        }
+
+        std::shared_ptr<ExprAST> clone() const override {
+            return std::make_shared<NewExpr>(NewExpr(className, arguments));
         }
     };
 }

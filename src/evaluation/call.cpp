@@ -54,7 +54,10 @@ std::shared_ptr<Values::Runtime> Interpreter::ICall(std::shared_ptr<AST::ExprAST
             	return value;
 			} else if(val->type() == "native-fn"){
 				NativeFN* sym = dynamic_cast<NativeFN*>(val.get());
-				return sym->call(args, env);
+				FunctionCallback cb;
+				cb.env = &env;
+				cb.parsedArgs = args;
+				return sym->call(&cb);
 			}
 //			else if(val->type() != "proto-fn")
 			else
@@ -66,7 +69,11 @@ std::shared_ptr<Values::Runtime> Interpreter::ICall(std::shared_ptr<AST::ExprAST
 	std::shared_ptr<Values::Runtime> fun = env.getVariable(ident->name).value;
 	if(fun->type() == "native-fn"){
 		NativeFN* fn = dynamic_cast<NativeFN*>(fun.get());
-		return fn->call(args, env);
+		FunctionCallback cb;
+		cb.env = &env;
+		cb.parsedArgs = args;
+		
+		return fn->call(&cb);
 	} else if(fun->type() == "function"){
 		Environment enva; enva.setParent(&env);
 		AST::Identifier* ident = dynamic_cast<AST::Identifier*>(call->Callee.get());

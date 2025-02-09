@@ -1,4 +1,5 @@
 #include <Interpreter.hpp>
+#include <ClassValues.hpp>
 
 using Nodes = AST::Nodes; 
 using string = std::string;
@@ -18,6 +19,17 @@ std::shared_ptr<Values::Runtime> Interpreter::IMember(std::shared_ptr<AST::ExprA
 
 	if(val->type() == "object"){
 		Values::Object* obj = dynamic_cast<Values::Object*>(val.get());
+		std::shared_ptr<Values::Runtime> value = obj->props[sym];
+
+		if(value != nullptr){
+			return value;
+		} else {
+			std::cout << "Property " << sym << " doesn't exist on the object" << ".\n";
+			exit(2);
+		}
+	} else if(val->type() == "class"){
+		Class* clus = dynamic_cast<Class*>(val.get());
+		Values::Object *obj = clus->objectify().get();
 		std::shared_ptr<Values::Runtime> value = obj->props[sym];
 
 		if(value != nullptr){

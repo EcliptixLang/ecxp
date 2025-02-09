@@ -23,6 +23,7 @@ std::shared_ptr<Values::Runtime> Interpreter::IIf(std::shared_ptr<AST::ExprAST>&
 	AST::IfStatement* whilee = dynamic_cast<AST::IfStatement*>(astNode.get());
 	Environment enva; enva.setParent(&env); enva.setup();
 	std::shared_ptr<Values::Runtime> cond = this->evaluate(whilee->conditional, enva);
+	std::cout << cond->type() << " " << cond->stringValue() << " " << truthy(cond) << "\n";
 	if(truthy(cond)){
 		for(auto& thing : whilee->consequent){
 			val = this->evaluate(thing, enva);

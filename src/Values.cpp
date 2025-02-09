@@ -1,5 +1,51 @@
 #include <Values.hpp>
 
+template <typename T>
+T* createValue(std::shared_ptr<Values::Runtime> thing){
+	return dynamic_cast<T*>(thing.get());
+}
+
+Values::Number* switchNumber(std::shared_ptr<Values::Runtime> thing){
+	return dynamic_cast<Values::Number*>(thing.get());
+}
+
+Values::String* switchString(std::shared_ptr<Values::Runtime> thing){
+	return dynamic_cast<Values::String*>(thing.get());
+}
+
+Values::Object* switchObject(std::shared_ptr<Values::Runtime> thing){
+	return dynamic_cast<Values::Object*>(thing.get());
+}
+
+
+template <typename T>
+std::shared_ptr<T> createValue(T thing){
+	return std::make_shared<T>(thing);
+}
+
+std::shared_ptr<Values::Null> createNull(){
+	return std::make_shared<Values::Null>();
+}
+
+std::string getValue(std::shared_ptr<Values::Runtime> val){
+	return val->type();
+}
+
+bool ValType(std::shared_ptr<Values::Runtime> val, std::string type){
+	return val->type() == type;
+}
+
+bool hasNullObjects(std::vector<std::string> objs, std::map<std::string, std::shared_ptr<Values::Runtime>> map){
+	for(auto obj : objs){
+		auto thingy = map[obj];
+		
+		if(thingy == nullptr)
+			return true;
+	}
+
+	return false;
+}
+
 namespace Values { 
     std::string runtimeToJson(const std::shared_ptr<Runtime> runtime) {
         std::string type = runtime->type();

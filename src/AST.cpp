@@ -24,6 +24,7 @@ namespace AST {
             case Nodes::Skip: return "skip";
             case Nodes::Return: return "return";
             case Nodes::Break: return "break";
+            case Nodes::Class: return "class";
             default: return "unknown";
         }
     }

@@ -1,8 +1,11 @@
 console.out("Welcome to Ecliptix!")
-set money: number = 0
+Number money = 0
 $"ls"
 
-console.out("hi")
+if(1 == 1){
+	console.out("hi")
+	$"sleep 5"
+}
 
 while(true){
 	$"clear"
@@ -12,10 +15,10 @@ while(true){
 	console.out("[2] Shop")
 	console.out("[3] Exit")
 
-	lock thing: string = console.ask("> ")
+	lock String thing = console.ask("> ")
 
 	if(thing == "1"){
-		lock random: number = 60
+		lock Number random = 60
 		money = money + random
 		console.out("You worked hard and gained", random)
 		process.wait(3)
@@ -24,7 +27,9 @@ while(true){
 		process.wait(3)
 	} else if(thing == "3"){
 		process.exit(0)
+	} else {
+		console.out("Invalid input")
+		process.wait(3)
 	}
 
-	break
 }

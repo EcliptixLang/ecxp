@@ -21,6 +21,7 @@ namespace Lexer {
 		DollarSign,
 		Dot,
 		Colon,
+		New,
 		Semicolon,
 		OpenParen, 
 		CloseParen, 
@@ -30,6 +31,7 @@ namespace Lexer {
 		CloseBracket,
 		Slash,
 		Set,
+		ExclamationMark,
 		Lock,
 		Fun,
 		If,
@@ -48,12 +50,16 @@ namespace Lexer {
 		Using,
 		When,
 		Type,
-		_EOF,
+		Class,
+		Uses,
+		_EOF
     };
 
     struct Token {
         std::string value;
         TokenType type;
+		int start;
+		int end;
     };
 
     TokenArr tokenize(std::string sourceCode, Settings settings);

@@ -175,7 +175,7 @@ namespace Values {
 		public:
 			std::map<std::string, std::shared_ptr<Runtime>> props;
 
-			Object(std::map<std::string, std::shared_ptr<Runtime>> props) : props(std::move(props)) {}
+			Object(std::map<std::string, std::shared_ptr<Runtime>> props) : props(props) {}
 			std::string type() const override {
 				return "object";
 			}
@@ -233,4 +233,23 @@ namespace Values {
       		}
 	};
 
+	class Type {
+		public:
+			std::string Typename;
+			std::vector<std::string> possibleTypes;
+
+
+	};
+
 };
+
+template <typename T>
+T* createValue(std::shared_ptr<Values::Runtime> thing);
+
+std::string getValue(std::shared_ptr<Values::Runtime> val);
+bool ValType(std::shared_ptr<Values::Runtime> val, std::string type);
+bool hasNullObjects(std::vector<std::string> objs, std::map<std::string, std::shared_ptr<Values::Runtime>> map);
+std::shared_ptr<Values::Null> createNull();
+Values::Number* switchNumber(std::shared_ptr<Values::Runtime> thing);
+Values::Object* switchObject(std::shared_ptr<Values::Runtime> thing);
+Values::String* switchString(std::shared_ptr<Values::Runtime> thing);

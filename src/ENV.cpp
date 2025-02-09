@@ -1,7 +1,13 @@
 #include <ENV.hpp>
 #include <FunctionValues.hpp>
 #include <iostream>
-#include <windows.h>
+
+#ifdef _WIN32
+    #include <windows.h>
+#else
+    #include <unistd.h>
+#endif
+
 #include <winutils.hpp>
 #include <Utilities.hpp>
 
@@ -68,4 +74,8 @@ void Environment::setVariableSafe(const std::string& varname, std::shared_ptr<Va
         return variables.push_back({ varname, vallo, constant });
     
     return parent->setVariableSafe(varname, vallo, constant);
+}
+
+std::vector<Variable> Environment::getVariables(){
+    return variables;
 }

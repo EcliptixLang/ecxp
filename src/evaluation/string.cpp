@@ -17,6 +17,7 @@ std::shared_ptr<Values::Runtime> Interpreter::IString(std::shared_ptr<AST::ExprA
 	replaceAll(val, "\\n", "\n");
 	replaceAll(val, "\\t", "\t");
 	replaceAll(val, "\\b", "\b");
+	replaceAll(val, "\\033", "\033");
 
 	return std::make_shared<Values::String>(Values::String(val));
 }

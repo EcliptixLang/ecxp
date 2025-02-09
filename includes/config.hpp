@@ -6,6 +6,7 @@ struct ProjSettings {
     std::string name = "Project";
     std::string version = "1.0";
     std::vector<std::string> libs {};
+    std::string content;
 };
 
 struct InterpreterSettings {
@@ -40,6 +41,8 @@ struct KeywordSettings {
     std::string _using = "using";
     std::string when = "when";
     std::string skip = "skip";
+    std::string _class = "class";
+    std::string uses = "uses";
 };
 
 struct Settings {

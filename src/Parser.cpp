@@ -7,6 +7,9 @@
 #include <vector>
 #include <algorithm>
 
+bool inClass = false;
+std::string currentClassName = "";
+
 using Token = Lexer::Token;
 using TokenType = Lexer::TokenType;
 #define PAST std::shared_ptr<AST::ExprAST>
@@ -59,7 +62,7 @@ std::shared_ptr<AST::Program> Parser::produceAST(
 	while(this->NotEOF()){
 		body.push_back(this->ParseStatement());
 	}
-
+	
 	return std::make_shared<AST::Program>(body);
 }
 
@@ -72,10 +75,7 @@ PAST Parser::ParseStatement() {
 			if(token.value == "lock")
 				constanty = true;
 			
-			if(settings.interpreter.use_new_syntax)
-				return ParseNewTypes();
-			else
-				return this->parseVariables();
+			return ParseNewTypes();
 		}
 		case TokenType::Fun:
 			return this->parseFunctions();
@@ -83,14 +83,82 @@ PAST Parser::ParseStatement() {
 			return this->parseIf();
 		case TokenType::When:
 			return this->parseWhen();
+		case TokenType::New:
+			return this->parseNew();
 		case TokenType::While:
 			return this->parseWhile();
+		case TokenType::Class:
+			return this->ParseClass();
 		case TokenType::DollarSign:
 			return this->parseDSNotation();
 		default:
 			return this->ParseExpression();
 	}
 }
+
+PAST Parser::parseNew() {
+    this->nextToken();
+    
+    std::string className = this->expectToken(TokenType::Identifier).value;
+    
+    std::vector<PAST> args;
+    if (this->currentToken().type == TokenType::OpenParen) {
+        args = this->parseArgs();
+    }
+
+    return std::make_shared<AST::NewExpr>(className, args);
+}
+
+PAST Parser::ParseClassStatement() {
+  	switch(this->currentToken().type){
+		case TokenType::Type:
+			return this->ParseNewTypes();
+		case TokenType::Set: case TokenType::Lock:{
+			Token token = this->nextToken();
+			if(token.value == "lock")
+				constanty = true;
+
+			return ParseNewTypes();
+		}
+		default:{
+			std::cout << "unknown statement within class body\n- " << Lexer::StringifyTokenTypes(this->currentToken().type) 
+					  << "\n- " << this->currentToken().value;
+			exit(9);
+		};
+	}
+}
+
+PAST Parser::ParseClass() {
+	std::vector<PAST> body{};
+	this->nextToken();
+	std::string name = this->expectToken(TokenType::Identifier).value;
+	TokenType type = this->nextToken().type;
+	std::string parent = "null";
+
+	if (type == TokenType::Uses){
+		parent = this->expectToken(TokenType::Identifier).value;
+		type = this->nextToken().type;
+	}
+
+	if (type != TokenType::OpenBrace){
+		std::cout << "Parser error, inside '" << name << "'\n- Missing brace" << "\n";
+		exit(8);
+	}
+
+	inClass = true;
+	currentClassName = name;
+
+	while (
+		this->NotEOF() &&
+		this->currentToken().type != TokenType::CloseBrace)
+	{
+		body.push_back(this->ParseClassStatement());
+	}
+
+	this->expectToken(TokenType::CloseBrace);
+	return std::make_shared<AST::Class>(name, body, parent);
+}
+
 
 PAST Parser::ParseNewTypes(){
 	std::string type = this->expectToken(TokenType::Type).value;
@@ -100,9 +168,9 @@ PAST Parser::ParseNewTypes(){
 
 	std::string name = this->expectToken(TokenType::Identifier).value;
 
-	std::string thing = this->expectOne(TokenType::OpenParen, TokenType::Equals).value;
+	TokenType thing = this->expectOne(TokenType::OpenParen, TokenType::Equals).type;
 
-	if(thing == "("){
+	if(thing == TokenType::OpenParen){
 		std::vector<PAST> args = 
 			this->parseArgs();
 
@@ -136,7 +204,7 @@ PAST Parser::ParseNewTypes(){
 		this->expectToken(TokenType::CloseBrace);
 
 		return std::make_shared<AST::Function>(params, name, body, type);
-	} else if(thing == "="){
+	} else if(thing == TokenType::Equals){
 		this->nextToken();
 		PAST value = this->ParseStatement();
 		bool cty = false;
@@ -144,9 +212,10 @@ PAST Parser::ParseNewTypes(){
 			cty = true;
 		constanty = false;
 		return std::make_shared<AST::VariableExpr>(name, type, value, cty);
+	} else {
+		std::cout << "unknown error " << Lexer::StringifyTokenTypes(thing);
+		exit(9);
 	}
-
-	exit(4);
 }
 
 PAST Parser::parseWhen() {
@@ -226,16 +295,11 @@ PAST Parser::parseIf() {
 			}
 		}
 
-		return std::make_shared<AST::IfStatement>(conditional, _operator, consequent, alternate);
-	}
+	return std::make_shared<AST::IfStatement>(conditional, _operator, consequent, alternate);
+}
 
 PAST Parser::parseFunctions() {
 		Token token = this->nextToken();
-
-		this->expectToken(TokenType::Colon);
-		
-		std::string type = 
-			this->expectToken(TokenType::Identifier).value;
 
 		std::string name = 
 			this->expectToken(TokenType::Identifier).value;
@@ -272,26 +336,24 @@ PAST Parser::parseFunctions() {
 
 		this->expectToken(TokenType::CloseBrace);
 
-		return std::make_shared<AST::Function>(params, name, body, type);
+		return std::make_shared<AST::Function>(params, name, body, "auto");
 }
 
+/*
 PAST Parser::parseVariables() {
 		bool isConstant = constanty;
 		constanty = false;
-		std::string ident = 
+		std::string type = 
 			this->expectToken(TokenType::Identifier).value;
-		std::string type = "";
 
-		this->expectToken(TokenType::Colon);
-
-		type = 
+		std::string ident = 
 			this->expectToken(TokenType::Identifier).value;
 
 		this->expectToken(TokenType::Equals);
 
 		PAST value = this->ParseStatement();
 		return std::make_shared<AST::VariableExpr>(ident, type, value, isConstant);
-	}
+	}*/
 
 PAST Parser::parseAssignment() {
 		PAST left = this->parseArrays();
@@ -545,6 +607,7 @@ PAST Parser::ParsePrimary() {
 				Lexer::Token oper;
 				if(this->currentToken().type == TokenType::ComparativeOperator){
 					oper = this->nextToken();
+					std::cout << oper.value << "\n";
 					right = this->ParseExpression();
 					value = std::make_shared<AST::EquExpr>(left, right, oper);
 				}else {
@@ -557,7 +620,7 @@ PAST Parser::ParsePrimary() {
 				this->nextToken();
 				return ParseStatement();
             default:
-                std::cout << "Unexpected token found during parsing\n- Value: " << this->currentToken().value << "\n- Type: " << Lexer::StringifyTokenTypes(this->currentToken().type) << "\n- past: " << Lexer::StringifyTokenTypes(this->lastToken.type) << "\n";
+                std::cout << "\033[31mParser Error\033[0m: Unexpected token found during parsing\n- Value: \033[36m" << this->currentToken().value << "\033[0m\n- Type: \033[36m" << Lexer::StringifyTokenTypes(this->currentToken().type) << "\033[0m\n- past: " << Lexer::StringifyTokenTypes(this->lastToken.type) << "\n";
                 exit(1);
         }
 }
