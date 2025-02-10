@@ -5,3 +5,5 @@ test.cpp
 node_modules
 .env
 *.h
+build
+.vscode

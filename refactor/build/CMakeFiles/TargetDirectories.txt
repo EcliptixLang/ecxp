@@ -1,3 +1,0 @@
-/home/sky/Projects/EcliptixPlus/refactor/build/CMakeFiles/EcliptixPlus.dir
-/home/sky/Projects/EcliptixPlus/refactor/build/CMakeFiles/edit_cache.dir
-/home/sky/Projects/EcliptixPlus/refactor/build/CMakeFiles/rebuild_cache.dir

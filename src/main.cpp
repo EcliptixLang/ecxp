@@ -1,75 +1,38 @@
-/** 
- * @name Ecliptix
- * @author SkyOPG
- * @brief A Programming language meant to be easy.
- * @details A cool general purpose programming language for use :D
- * @version 0.2
- */
-
-#include <Parser.hpp>
-#include <Interpreter.hpp>
-//#include <config.hpp>
-#include <winutils.hpp>
+#include "parser/parser.hpp"
+#include "compiler/compiler.hpp"
+#include "executor/executor.hpp"
+#include "ast.hpp"
 #include <iostream>
-//#include <curl/curl.h>
-#include <ArgumentParser.hpp>
 
-std::string file = "[project]\nname = \"Project\"\nversion = \"1.0\"\nlibs = []\n[interpreter]\nmax_when = 10\nuse_new_syntax = false\n[types]\nstring = \"String\"\nnumber = \"Numbah\"\nobject = \"Object\"\narray = \"Array\"\nboolean = \"Boolean\"\nauto = \"Auto\"\nnull = \"Null\"\nshell = \"Shell\"\n[keywords]\nlock = \"lock\"\nfun = \"fun\"\nif = \"if\"\nelse = \"else\"\nfor = \"for\"\nwhile = \"while\"\nreturn = \"return\"\nset = \"set\"\nbreak = \"break\"\ntake = \"take\"\nfrom = \"from\"\ngive = \"give\"\nusing = \"using\"\nwhen = \"when\"\nskip = \"skip\"";
+// temp
 
-Environment ParentENV;
-Interpreter irpr;
+struct GlobalConfig {
+    bool debug = false;
+};
 
-int runFile(std::string filePath, Settings settings){
-	std::string code = Utilities::readFile(filePath);
-    settings.project.content = code;
-    Parser parser(settings);
-    irpr.settings = settings;
-    ParentENV.settings = settings;
-	std::shared_ptr<AST::ExprAST> ast = parser.produceAST(code);
-	irpr.evaluate(ast, ParentENV);
-	
-	return 0;
-}
+// temp
 
-int runREPL(Settings settings){
-    Parser parser(settings);
-    while(true){
-        std::cout << "> ";
-        std::string code;
-        std::getline(std::cin, code);
-        if(code == "exit")
-            exit(0);
+int main(int argc, char* argv[]){
+    GlobalConfig conf;
+    ArgumentParser args(argc, argv);
 
-        std::shared_ptr<AST::ExprAST> ast = parser.produceAST(code);
-        irpr.evaluate(ast, ParentENV);
+    if(args.getPositionalArgs().size() == 0)
+        return -1;
+
+    std::string file = Utilities::readFile(args.getPositionalArgs()[0]);
+
+    Parser parser;
+    std::shared_ptr<AST::ExprAST> prog = parser.produceAST(file);
+
+    if(args.hasFlag("-c") || args.hasFlag("--compile")){
+        Compiler compiler;
+        compiler.compile(prog);
+        compiler.save(args.getFlagValues("-o")[0]);
+    } else {
+        Interpreter irpr;
+        Environment env;
+        irpr.evaluate(prog, env);
     }
 
     return 0;
-}
-
-int main(int argc, char* argv[]) {
-    ArgumentParser argParser(argc, argv);
-    if(argParser.hasFlag("-h") || argParser.hasFlag("--help")){
-        std::cout << "Ecliptix Plus help menu\n";
-        std::cout << "Usage: ecx [arguments] (file1, file2...)\n";
-        std::cout << "\t-r, --repl: Run a REPL\n";
-        std::cout << "\t-h, --help: Show help commands\n";
-        std::cout << "\t-i, --init: Initialize a new Ecliptix project\n";
-        exit(0);
-    }
-
-    if(argParser.hasFlag("-i") || argParser.hasFlag("--init")){
-        Utilities::writeFile("config.ecc", file);
-        std::cout << "Created config.ecc with default settings!\n";
-        exit(0);
-    }
-
-    Settings settings;
-    ParentENV.setup();
-    if(argParser.hasFlag("-r") || argParser.hasFlag("--repl"))
-        return runREPL(settings);
-    std::vector<std::string> files = argParser.getPositionalArgs();
-	for(auto file : files){
-        runFile(file, settings);
-    }
 }
