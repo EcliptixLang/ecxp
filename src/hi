@@ -1,1 +1,0 @@
-g++ main.cpp lexer/lexer.cpp lexer/stringify.cpp parser/parser.cpp utilities/config.cpp utilities/utils.cpp executor/executor.cpp compiler/compiler.cpp parser/statements/stmt.cpp parser/statements/vars-fn.cpp -o hi.out
