@@ -10,7 +10,7 @@ PAST Parser::parseMember() {
 		if(_operator.type == TokenType::Dot){
 			computed = false;
 			property = this->ParsePrimary();
-			if(property->getType() != AST::Nodes::Identifier){
+			if(property->nodeType() != AST::NodeType::IdentifierExpr){
 				throw std::runtime_error("idk");
 			}
 		} else {
@@ -19,7 +19,7 @@ PAST Parser::parseMember() {
 			this->expectToken(TokenType::CloseBracket);
 		}
 
-		object = std::make_shared<AST::MemberExpr>(object, property, computed);
+		object = std::make_shared<AST::MemberAccessExpr>(object, property, computed);
 	}
 
 	return object;

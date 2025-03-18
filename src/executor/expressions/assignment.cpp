@@ -1,24 +1,22 @@
 #include "../executor.hpp"
 
-using Nodes = AST::Nodes; 
+using NodeType = AST::NodeType; 
 using string = std::string;
 
-std::shared_ptr<Values::Runtime> Interpreter::IAssignment(std::shared_ptr<AST::ExprAST>& astNode, Environment& env){
-	AST::AssignmentExpr* assignment = dynamic_cast<AST::AssignmentExpr*>(astNode.get());
-	if(assignment->assignee->getType() != AST::Nodes::Identifier){
+std::shared_ptr<Values::Runtime> Interpreter::evaluateAssignment(const AST::AssignmentExpr& node, std::shared_ptr<Runtime::Environment> &env){
+	if(node.target->nodeType() != AST::NodeType::IdentifierExpr){
 		std::cout << "Invalid assignment.\n";
 	}
-	AST::Identifier* var = dynamic_cast<AST::Identifier*>(assignment->assignee.get());
+	AST::IdentifierExpr* var = dynamic_cast<AST::IdentifierExpr*>(node.target.get());
 	
-	Variable vall = env.getVariable(var->name);
+	Runtime::Variable vall = env->get(var->name);
 	if(vall.value != nullptr){
-		
-		std::shared_ptr<Values::Runtime> val = this->evaluate(assignment->value, env); 
-		if(vall.type == val->type()){
-			env.setVariableSafe(var->name, val, vall.constant);
+		std::shared_ptr<Values::Runtime> val = this->evaluate(node.value, env); 
+		if(vall.value->type() == val->type()){
+			env->set(var->name, val, vall.is_constant);
 			return std::make_shared<Values::Null>(Values::Null());
 		} else {
-			std::cout << "Error while declaring variable '" << var->name << "', because it seems like it's requiring type '" << vall.type << "' and the value applied to it was of type '" << val->type() << "'.\n";
+			std::cout << "Error while declaring variable '" << var->name << "', because it seems like it's requiring type '" << vall.value->type() << "' and the value applied to it was of type '" << val->type() << "'.\n";
 			exit(6);
 		}
 	} else {

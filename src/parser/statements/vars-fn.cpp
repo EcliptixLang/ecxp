@@ -5,7 +5,7 @@
 PAST Parser::ParseNewTypes(){
 	bool isArray = false;
 	int size = 0;
-	std::string type = this->expectToken(TokenType::Identifier).value;
+	std::string type = this->expectToken(TokenType::Type).value;
 
 	if(this->currentToken().type == TokenType::OpenBracket){
 		this->nextToken();
@@ -31,11 +31,11 @@ PAST Parser::ParseNewTypes(){
 
 		for(auto& arg : args){
 			AST::ExprAST* expr = arg.get();
-			if(expr->getType() != AST::Nodes::Identifier){
+			if(expr->nodeType() != AST::NodeType::IdentifierExpr){
 				throw "Parameters expected inside function declaration";
 			}
 
-	      	AST::Identifier* id = dynamic_cast<AST::Identifier*>(
+	      	AST::IdentifierExpr* id = dynamic_cast<AST::IdentifierExpr*>(
 				arg.get()
 			);
 			
@@ -56,7 +56,7 @@ PAST Parser::ParseNewTypes(){
 
 		this->expectToken(TokenType::CloseBrace);
 
-		return std::make_shared<AST::Function>(params, name, body, type);
+		return std::make_shared<AST::FunctionDeclaration>(params, name, body, type);
 	} else if(thing == TokenType::Equals){
 		this->nextToken();
 		PAST value = this->ParseStatement();
@@ -64,9 +64,9 @@ PAST Parser::ParseNewTypes(){
 		if(constanty)
 			cty = true;
 		constanty = false;
-		return std::make_shared<AST::VariableExpr>(name, type, value, cty);
+		return std::make_shared<AST::VariableDeclarationExpr>(name, type, value, cty);
 	} else {
-		std::cout << "unknown error " << lexer.StringifyTokenTypes(thing);
+		std::cout << "unknown error " << lexer.StringifyTokenTypes(thing) << std::endl;
 		exit(9);
 	}
 }

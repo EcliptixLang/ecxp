@@ -1,12 +1,46 @@
 #include "executor.hpp"
+#include <string>
+#include <stdexcept>
 
-using Nodes = AST::Nodes; 
+using NodeType = AST::NodeType;
+
+const std::string& nodeTypeTranslate(NodeType type) {
+    switch(type) {
+        case NodeType::NumberLiteral:    { static std::string s = "NumberLiteral"; return s; }
+        case NodeType::StringLiteral:    { static std::string s = "StringLiteral"; return s; }
+        case NodeType::ProgramRoot:      { static std::string s = "ProgramRoot"; return s; }
+        case NodeType::IdentifierExpr:   { static std::string s = "IdentifierExpr"; return s; }
+        case NodeType::VariableDeclaration: { static std::string s = "VariableDeclaration"; return s; }
+        case NodeType::SkipStatement:    { static std::string s = "SkipStatement"; return s; }
+        case NodeType::AssignmentExpr:   { static std::string s = "AssignmentExpr"; return s; }
+        case NodeType::BinaryOperation:  { static std::string s = "BinaryOperation"; return s; }
+        case NodeType::FunctionCall:     { static std::string s = "FunctionCall"; return s; }
+        case NodeType::ImportStatement:  { static std::string s = "ImportStatement"; return s; }
+        case NodeType::WhenStatement:    { static std::string s = "WhenStatement"; return s; }
+        case NodeType::WhileLoop:        { static std::string s = "WhileLoop"; return s; }
+        case NodeType::IfStatement:      { static std::string s = "IfStatement"; return s; }
+        case NodeType::FunctionDeclaration: { static std::string s = "FunctionDeclaration"; return s; }
+        case NodeType::ArrayLiteral:     { static std::string s = "ArrayLiteral"; return s; }
+        case NodeType::ShellCommand:     { static std::string s = "ShellCommand"; return s; }
+        case NodeType::ObjectProperty:   { static std::string s = "ObjectProperty"; return s; }
+        case NodeType::ObjectLiteral:    { static std::string s = "ObjectLiteral"; return s; }
+        case NodeType::MemberAccess:     { static std::string s = "MemberAccess"; return s; }
+        case NodeType::EqualityCheck:    { static std::string s = "EqualityCheck"; return s; }
+        case NodeType::BreakStatement:   { static std::string s = "BreakStatement"; return s; }
+        case NodeType::NewExpression:    { static std::string s = "NewExpression"; return s; }
+        case NodeType::ReturnStatement:  { static std::string s = "ReturnStatement"; return s; }
+        default:
+            throw std::invalid_argument("Unknown NodeType");
+    }
+}
+
+using NodeType = AST::NodeType; 
 using string = std::string;
 
 bool traoti(std::shared_ptr<Values::Runtime>& conditional){
 	if(conditional->type() == "boolean"){
 		Values::Boolean* cond = dynamic_cast<Values::Boolean*>(conditional.get());
-		const bool boolean = cond->value;
+		const bool boolean = cond->value();
 		if(boolean) return true; 
 		else return false;
 	}
@@ -22,61 +56,23 @@ void runCommand(const string& command) {
 	system(command.c_str());
 }
 
-std::shared_ptr<Values::Runtime> Interpreter::evaluate(std::shared_ptr<AST::ExprAST>& astNode, Environment& env){
-	
-		AST::Nodes type = astNode->getType();
-		switch (type){
-			case Nodes::Program:
-				return IProgram(astNode, env);
-			case Nodes::Call:
-				return ICall(astNode, env);
-			case Nodes::String:
-				return IString(astNode);
-			case Nodes::Identifier:
-				return IIdent(astNode, env);
-			case Nodes::Number:
-				return INumber(astNode);
-			case Nodes::Variable:
-				return IVariable(astNode, env);
-			case Nodes::Binary:
-				return IBinary(astNode, env);
-			case Nodes::Array:
-				return IArray(astNode, env);
-			case Nodes::Member:
-				return IMember(astNode, env);
-			case Nodes::If:
-				return IIf(astNode, env);
-			case Nodes::Equality:
-				return IEqu(astNode, env);
-			case Nodes::Skip:
-				return std::make_shared<Values::Skip>(Values::Skip());
-			case Nodes::ShellCmd:{
-				AST::ShellCMD* cmd = dynamic_cast<AST::ShellCMD*>(astNode.get());
-				runCommand(cmd->cmd);
-				return std::make_shared<Values::Null>(Values::Null());
-			} break;
-			case Nodes::Break:
-				return std::make_shared<Values::Break>(Values::Break());
-			case Nodes::Function:
-				return IFunction(astNode, env);
-			case Nodes::Assignment:
-				return IAssignment(astNode, env);
-			break;
-			case Nodes::While:
-				return IWhile(astNode, env);
-			case Nodes::When:
-				return IWhen(astNode, env);
-			case Nodes::Object:
-				return IObject(astNode, env);
-			break;
-			case Nodes::Return: {
-				AST::ReturnExpr* number = dynamic_cast<AST::ReturnExpr*>(astNode.get());
-				return std::make_shared<Values::ReturnedValue>(Interpreter::evaluate(number->value, env));
-			} break;
-			default:
-				std::cerr 
-					<< "This AST Node is not yet set up for interpretation.\n" 
-					<< "- Type: " << AST::stringifyAST(type) << "\n";
-				exit(1);
-		}
+using namespace AST;
+using namespace Values;
+
+std::shared_ptr<Values::Runtime> Interpreter::evaluate(
+    const std::shared_ptr<ExprAST>& astNode,
+    std::shared_ptr<Runtime::Environment> &env
+) {
+    try {
+        EnvironmentGuard guard(env);
+        EvalVisitor visitor(*this, env);
+        astNode->accept(visitor);
+        
+        if (!visitor.result) {
+            throw InterpreterError("Evaluation returned null result");
+        }
+        return visitor.result;
+    } catch (const InterpreterError& e) {
+        throw InterpreterError(std::string("Evaluation failed: ") + e.what());
+    }
 }

@@ -42,9 +42,9 @@ enum class TokenType {
 	At,
 	Using,
 	When,
-	Type,
 	Class,
 	Uses,
+	Type,
 	_EOF
 };
 

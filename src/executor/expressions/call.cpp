@@ -1,111 +1,107 @@
 #include "../executor.hpp"
 #include "../../fnvalues.hpp"
 
-using Nodes = AST::Nodes; 
+using NodeType = AST::NodeType; 
 using string = std::string;
 
-std::shared_ptr<Values::Runtime> Interpreter::ICall(std::shared_ptr<AST::ExprAST>& astNode, Environment& env){
-	AST::CallExpr* call = dynamic_cast<AST::CallExpr*>(astNode.get());
-	
+std::shared_ptr<Values::Runtime> Interpreter::evaluateFunctionCall(const AST::FunctionCallExpr& node, std::shared_ptr<Runtime::Environment> &env){
 	std::vector<std::shared_ptr<Values::Runtime>> args{};
-	for(auto& arg : call->Args){
-		args.push_back(Interpreter::evaluate(arg, env));
+	for(auto& arg : node.arguments){
+		args.push_back(this->evaluate(arg, env));
 	}
 
-	Nodes calleeType = call->Callee->getType();
-	if(calleeType == Nodes::Member){
-			std::shared_ptr<Values::Runtime> value;
-			std::shared_ptr<Values::Runtime> val = IMember(call->Callee, env);
-//			console.log(val->type());
+	NodeType calleeType = node.callee->nodeType();
+	if(calleeType == NodeType::MemberAccess){
+		std::shared_ptr<Values::Runtime> value;
+		std::shared_ptr<Values::Runtime> val = this->evaluate(node.callee, env);
 			if(val->type() == "function"){
-				Environment enva; enva.setParent(&env);
+				Runtime::Environment enva(std::make_shared<Runtime::Environment>(env));
 				Values::Function* fn = dynamic_cast<Values::Function*>(val.get());
 				std::shared_ptr<Values::Runtime> value;
 
             	int i = 0;
-            	for(auto& param : fn->parameters){
+            	for(auto& param : fn->parameters()){
             		if(args.size() >= i)
-            			env.setVariable(param, args[i], args[i]->type(), false);
+            			env->set(param, args[i], false);
             		else
-            			env.setVariable(param, std::make_shared<Values::Null>(Values::Null()), "null", false);
+            			env->set(param, std::make_shared<Values::Null>(Values::Null()), false);
             		i++;
             	}
 
-            	for(auto& expr : fn->body){
+            	for(auto& expr : fn->body()){
             		value = this->evaluate(expr, env);
             		if(value->type() == "return"){
             			Values::ReturnedValue* sum = dynamic_cast<Values::ReturnedValue*>(value.get());
-            			if(sum->value->type() == fn->Type || fn->Type == "auto")
-            				return sum->value;
+            			if(sum->value()->type() == fn->type() || fn->type() == "auto")
+            				return sum->value();
             			else {
-            				std::cout << "Error while running function '" << fn->name << "', it seems like it's requiring type '" << fn->Type << "' and the value it returned was of type '" << sum->value->type() << "'.\n";
+            				std::cout << "Error while running function '" << fn->name() << "', it seems like it's requiring type '" << fn->type() << "' and the value it returned was of type '" << sum->value()->type() << "'.\n";
             				exit(6);
             			}	
             		}
             	}
 
-            	if(fn->Type == "void" || fn->Type == "nothing")
+            	if(fn->type() == "void" || fn->type() == "nothing")
             		return value;
             	else {
-            		std::cout << "Error (INTERPRETER):\n- Error Code: 7\n- Error Description: No return in non void function\n- Function name: '" << fn->name << "'\n- Required type: '" << fn->Type << "'\n";
+            		std::cout << "Error (INTERPRETER):\n- Error Code: 7\n- Error Description: No return in non void function\n- Function name: '" << fn->name() << "'\n- Required type: '" << fn->type() << "'\n";
             		exit(7);
             	}	
 
             	return value;
 			} else if(val->type() == "native-fn"){
 				Values::NativeFN* sym = dynamic_cast<Values::NativeFN*>(val.get());
-				FunctionCallback cb;
-				cb.env = &env;
+				Values::FunctionCallback cb;
+				cb.env = std::make_shared<Runtime::Environment>(env);
 				cb.parsedArgs = args;
 				return sym->call(&cb);
 			}
-//			else if(val->type() != "proto-fn")
 			else
 				throw std::runtime_error("Callee is not a function");
 	}
 	
 	
-	AST::Identifier* ident = dynamic_cast<AST::Identifier*>(call->Callee.get());
-	std::shared_ptr<Values::Runtime> fun = env.getVariable(ident->name).value;
+	AST::IdentifierExpr* ident = dynamic_cast<AST::IdentifierExpr*>(node.callee.get());
+	std::shared_ptr<Values::Runtime> fun = env->get(ident->name).value;
 	if(fun->type() == "native-fn"){
 		Values::NativeFN* fn = dynamic_cast<Values::NativeFN*>(fun.get());
-		FunctionCallback cb;
-		cb.env = &env;
+		Values::FunctionCallback cb;
+		cb.env = std::make_shared<Runtime::Environment>(env);
 		cb.parsedArgs = args;
 		
 		return fn->call(&cb);
 	} else if(fun->type() == "function"){
-		Environment enva; enva.setParent(&env);
-		AST::Identifier* ident = dynamic_cast<AST::Identifier*>(call->Callee.get());
-    	Variable fun = env.getVariable(ident->name);
+		Runtime::Environment enva(std::make_shared<Runtime::Environment>(env));
+		AST::IdentifierExpr* ident = dynamic_cast<AST::IdentifierExpr*>(node.callee.get());
+    	Runtime::Variable fun = env->get(ident->name);
 
     	Values::Function* fn = dynamic_cast<Values::Function*>(fun.value.get());
     	std::shared_ptr<Values::Runtime> value;
 
     	int i = 0;
-    	for(auto& param : fn->parameters){
+    	for(auto& param : fn->parameters()){
     		if(args.size() >= i)
-    			env.setVariable(param, args[i], args[i]->type(), false);
+    			env->set(param, args[i], false);
     		i++;
     	}
     
-    	for(auto& expr : fn->body){
+    	for(auto& expr : fn->body()){
     		value = this->evaluate(expr, env);
     		if(value->type() == "return"){
     			Values::ReturnedValue* sum = dynamic_cast<Values::ReturnedValue*>(value.get());
-    			if(sum->value->type() == fn->Type || fn->Type == "auto")
-    				return sum->value;
+    			if(sum->value()->type() == fn->type() || fn->type() == "auto")
+    				return sum->value();
     			else {
-    				std::cout << "Error while running function '" << fn->name << "', it seems like it's requiring type '" << fn->Type << "' and the value it returned was of type '" << sum->value->type() << "'.\n";
+    				std::cout << "Error while running function '" << fn->name() << "', it seems like it's requiring type '" << fn->type() << "' and the value it returned was of type '" << sum->value()->type() << "'.\n";
     				exit(6);
     			}	
     		}
     	}
 
-    	if(fn->Type == "void" || fn->Type == "nothing")
+    	if(fn->type() == "void" || fn->type() == "nothing")
     		return value;
     	else {
-    		std::cout << "Error (INTERPRETER):\n- Error Code: 7\n- Error Description: No return in non void function\n- Function name: '" << fn->name << "'\n- Required type: '" << fn->Type << "'\n";
+    		std::cout << "Error (INTERPRETER):\n- Error Code: 7\n- Error Description: No return in non void function\n- Function name: '" << fn->name() << "'\n- Required type: '" << fn->type() << "'\n";
     		exit(7);
     	}	
 
@@ -113,4 +109,5 @@ std::shared_ptr<Values::Runtime> Interpreter::ICall(std::shared_ptr<AST::ExprAST
 	}
 
 	throw std::runtime_error("Non function is trying to get called.");
+	
 }

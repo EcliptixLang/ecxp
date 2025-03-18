@@ -15,5 +15,5 @@ PAST Parser::parseWhile() {
 
 		this->expectToken(TokenType::CloseBrace);
 
-		return std::make_shared<AST::WhileDeclaration>(conditional, _operator, consequent);
+		return std::make_shared<AST::WhileLoop>(conditional, _operator, consequent);
 	}

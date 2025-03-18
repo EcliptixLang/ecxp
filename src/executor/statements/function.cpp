@@ -1,12 +1,12 @@
 #include "../executor.hpp"
 
-using Nodes = AST::Nodes; 
+using NodeType = AST::NodeType; 
 using string = std::string;
 
-std::shared_ptr<Values::Runtime> Interpreter::IFunction(std::shared_ptr<AST::ExprAST>& astNode, Environment& env){
-	AST::Function* fun = dynamic_cast<AST::Function*>(astNode.get());
+std::shared_ptr<Values::Runtime> Interpreter::evaluateFunctionDeclaration(const AST::FunctionDeclaration& node, std::shared_ptr<Runtime::Environment> &env){	
+	Values::Function fun(node.body, node.parameters, node.name, node.returnType);
+	std::shared_ptr<Values::Function> func = std::make_shared<Values::Function>(fun);
+	env->set(node.name, func, true);
 
-	env.setVariable(fun->name, std::make_shared<Values::Function>(Values::Function(fun->body, fun->params, fun->name, fun->type)), "function", true);
-
-	return env.getVariable(fun->name).value;
+	return func;
 }

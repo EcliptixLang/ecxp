@@ -1,6 +1,6 @@
 #include "parser.hpp"
 
-std::shared_ptr<AST::Program> Parser::produceAST(
+std::shared_ptr<AST::ProgramRoot> Parser::produceAST(
 	std::string& sourceCode
 ){
 	Tokens = lexer.tokenize(sourceCode);
@@ -10,5 +10,5 @@ std::shared_ptr<AST::Program> Parser::produceAST(
 		body.push_back(this->ParseStatement());
 	}
 	
-	return std::make_shared<AST::Program>(body);
+	return std::make_shared<AST::ProgramRoot>(body);
 }

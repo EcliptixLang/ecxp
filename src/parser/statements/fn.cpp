@@ -13,11 +13,11 @@ PAST Parser::parseFunctions() {
 
 		for(auto& arg : args){
 			AST::ExprAST* expr = arg.get();
-			if(expr->getType() != AST::Nodes::Identifier){
+			if(expr->nodeType() != AST::NodeType::IdentifierExpr){
 				throw "Parameters expected inside function declaration";
 			}
 
-	      	AST::Identifier* id = dynamic_cast<AST::Identifier*>(
+	      	AST::IdentifierExpr* id = dynamic_cast<AST::IdentifierExpr*>(
 				arg.get()
 			);
 			
@@ -38,6 +38,6 @@ PAST Parser::parseFunctions() {
 
 		this->expectToken(TokenType::CloseBrace);
 
-
-		return std::make_shared<AST::Function>(params, name, body, "auto");
+		AST::FunctionDeclaration fn(params, name, body, "auto");
+		return std::make_shared<AST::FunctionDeclaration>(fn);
 }

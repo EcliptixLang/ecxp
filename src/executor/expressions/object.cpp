@@ -1,16 +1,16 @@
 #include "../executor.hpp"
 
-using Nodes = AST::Nodes; 
+using NodeType = AST::NodeType; 
 using string = std::string;
 
-std::shared_ptr<Values::Runtime> Interpreter::IObject(std::shared_ptr<AST::ExprAST>& astNode, Environment& env){
-	AST::Object* obj = dynamic_cast<AST::Object*>(astNode.get());
+std::shared_ptr<Values::Runtime> Interpreter::evaluateObjectLiteral(const AST::ObjectLiteral& node, std::shared_ptr<Runtime::Environment> &env){
 	std::map<string, std::shared_ptr<Values::Runtime>> props;
 
-	for (const auto& val : obj->map) {
-		AST::Element* element = dynamic_cast<AST::Element*>(val.get());
+	for (const auto& val : node.properties) {
+		AST::ObjectProperty* element = dynamic_cast<AST::ObjectProperty*>(val.get());
 		props[element->key] = (this->evaluate(element->value, env));
 	}
 
 	return std::make_shared<Values::Object>(props);
+
 }

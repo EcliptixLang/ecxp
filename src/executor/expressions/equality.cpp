@@ -1,6 +1,6 @@
 #include "../executor.hpp"
 
-using Nodes = AST::Nodes; 
+using NodeType = AST::NodeType; 
 using string = std::string;
 
 bool isTruthy(std::shared_ptr<Values::Runtime>& left, Token op, std::shared_ptr<Values::Runtime>& right){
@@ -10,9 +10,9 @@ bool isTruthy(std::shared_ptr<Values::Runtime>& left, Token op, std::shared_ptr<
 	} else if(oap == "!="){
 		return left->stringValue() != right->stringValue();	
 	} else if(oap == ">="){
-		if(left->type() == "number" && right->type() == "number"){
-			int l = dynamic_cast<Values::Number*>(left.get())->value;
-			int r = dynamic_cast<Values::Number*>(right.get())->value;
+		if(left->type() == "Number" && right->type() == "Number"){
+			int l = dynamic_cast<Values::Number*>(left.get())->value();
+			int r = dynamic_cast<Values::Number*>(right.get())->value();
 			return l >= r;
 		} else if (left->type() == "null" || right->type() == "null"){
 			return false;
@@ -20,9 +20,9 @@ bool isTruthy(std::shared_ptr<Values::Runtime>& left, Token op, std::shared_ptr<
 			return false;
 		}
 	} else if(oap == "<="){
-		if(left->type() == "number" && right->type() == "number"){
-			int l = dynamic_cast<Values::Number*>(left.get())->value;
-			int r = dynamic_cast<Values::Number*>(right.get())->value;
+		if(left->type() == "Number" && right->type() == "Number"){
+			int l = dynamic_cast<Values::Number*>(left.get())->value();
+			int r = dynamic_cast<Values::Number*>(right.get())->value();
 			return l <= r;
 		} else if (left->type() == "null" || right->type() == "null"){
 			return false;
@@ -31,7 +31,7 @@ bool isTruthy(std::shared_ptr<Values::Runtime>& left, Token op, std::shared_ptr<
 		}
 	} else if(oap == "@="){
 		if(left->type() == "array"){
-			std::vector<std::shared_ptr<Values::Runtime>> l = dynamic_cast<Values::Array*>(left.get())->elements;
+			std::vector<std::shared_ptr<Values::Runtime>> l = dynamic_cast<Values::Array*>(left.get())->elements();
 			for(auto& lol : l){
 				if(lol->stringValue() == right->stringValue())
 					return true;
@@ -41,9 +41,9 @@ bool isTruthy(std::shared_ptr<Values::Runtime>& left, Token op, std::shared_ptr<
 			return false;
 		}
 	} else if(oap == "<"){
-		if(left->type() == "number" && right->type() == "number"){
-			int l = dynamic_cast<Values::Number*>(left.get())->value;
-			int r = dynamic_cast<Values::Number*>(right.get())->value;
+		if(left->type() == "Number" && right->type() == "Number"){
+			int l = dynamic_cast<Values::Number*>(left.get())->value();
+			int r = dynamic_cast<Values::Number*>(right.get())->value();
 			return l < r;
 		} else if (left->type() == "null" || right->type() == "null"){
 			return false;
@@ -51,9 +51,9 @@ bool isTruthy(std::shared_ptr<Values::Runtime>& left, Token op, std::shared_ptr<
 			return false;
 		}
 	} else if(oap == ">") {
-		if(left->type() == "number" && right->type() == "number"){
-			int l = dynamic_cast<Values::Number*>(left.get())->value;
-			int r = dynamic_cast<Values::Number*>(right.get())->value;
+		if(left->type() == "Number" && right->type() == "Number"){
+			int l = dynamic_cast<Values::Number*>(left.get())->value();
+			int r = dynamic_cast<Values::Number*>(right.get())->value();
 			return l > r;
 		} else if (left->type() == "null" || right->type() == "null"){
 			return false;
@@ -64,13 +64,13 @@ bool isTruthy(std::shared_ptr<Values::Runtime>& left, Token op, std::shared_ptr<
 	return false;
 }
 
-std::shared_ptr<Values::Runtime> Interpreter::IEqu(std::shared_ptr<AST::ExprAST>& astNode, Environment& env){
-	AST::EquExpr* equ = dynamic_cast<AST::EquExpr*>(astNode.get());
-	std::shared_ptr<Values::Runtime> left = this->evaluate(equ->left, env);
-	std::shared_ptr<Values::Runtime> right = this->evaluate(equ->right, env);
+std::shared_ptr<Values::Runtime> Interpreter::evaluateEqualityExpression(const AST::EqualityCheckExpr& node, std::shared_ptr<Runtime::Environment> &env){
+	std::shared_ptr<Values::Runtime> left = this->evaluate(node.left, env);
+	std::shared_ptr<Values::Runtime> right = this->evaluate(node.right, env);
 
-	if(isTruthy(left, equ->oper, right)){
+	if(isTruthy(left, node.operatorToken, right)){
 		return std::make_shared<Values::Boolean>(true);
 	}
 	else return std::make_shared<Values::Boolean>(false);
+
 }

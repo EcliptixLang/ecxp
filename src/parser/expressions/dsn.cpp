@@ -7,5 +7,5 @@ PAST Parser::parseDSNotation() {
 		this->nextToken();
 		Token idk = this->expectToken(TokenType::String);
 
-		return std::make_shared<AST::ShellCMD>(idk.value);
+		return std::make_shared<AST::ShellCommandExpr>(idk.value);
 	}

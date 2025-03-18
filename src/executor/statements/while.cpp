@@ -1,12 +1,12 @@
 #include "../executor.hpp"
 
-using Nodes = AST::Nodes; 
+using NodeType = AST::NodeType; 
 using string = std::string;
 
 bool troti(std::shared_ptr<Values::Runtime>& conditional){
 	if(conditional->type() == "boolean"){
 		Values::Boolean* cond = dynamic_cast<Values::Boolean*>(conditional.get());
-		const bool boolean = cond->value;
+		const bool boolean = cond->value();
 		if(boolean) return true; 
 		else return false;
 	}
@@ -18,14 +18,12 @@ bool troti(std::shared_ptr<Values::Runtime>& conditional){
 	}
 }
 
-std::shared_ptr<Values::Runtime> Interpreter::IWhile(std::shared_ptr<AST::ExprAST>& astNode, Environment& env){
+std::shared_ptr<Values::Runtime> Interpreter::evaluateWhileLoop(const AST::WhileLoop& node, std::shared_ptr<Runtime::Environment> &env){
     bool truu = true;
-    AST::WhileDeclaration* whilee = dynamic_cast<AST::WhileDeclaration*>(astNode.get());
-    
     while(truu){
-        Environment enva; enva.setParent(&env);
-        std::shared_ptr<Values::Runtime> cond = this->evaluate(whilee->conditional, env);
-        std::vector<std::shared_ptr<AST::ExprAST>> thingy = whilee->consequent;
+        auto enva = std::make_shared<Runtime::Environment>(env);
+        std::shared_ptr<Values::Runtime> cond = this->evaluate(node.condition, env);
+        std::vector<std::shared_ptr<AST::ExprAST>> thingy = node.body;
         if(troti(cond)){
             for(auto& thing : thingy){
                 std::shared_ptr<Values::Runtime> val = this->evaluate(thing, enva);

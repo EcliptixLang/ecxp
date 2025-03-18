@@ -34,5 +34,5 @@ PAST Parser::parseArrays() {
 
 		this->expectToken(TokenType::CloseBracket);
 
-		return std::make_shared<AST::Array>(arr);
+		return std::make_shared<AST::ArrayLiteral>(arr);
 	}

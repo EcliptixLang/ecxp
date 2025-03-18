@@ -36,30 +36,29 @@ namespace Utilities {
 #include "../ast.hpp"
 
 namespace AST {
-    std::string stringifyAST(Nodes type){
+    std::string stringifyAST(NodeType type){
         switch(type){
-            case Nodes::Number: return "number";
-            case Nodes::Array: return "array";
-            case Nodes::Assignment: return "assignment";
-            case Nodes::Binary: return "binary";
-            case Nodes::Call: return "call";
-            case Nodes::Element: return "element";
-            case Nodes::Equality: return "equality";
-            case Nodes::Function: return "function";
-            case Nodes::Identifier: return "identifier";
-            case Nodes::If: return "if";
-            case Nodes::Member: return "member";
-            case Nodes::Object: return "object";
-            case Nodes::Program: return "program";
-            case Nodes::ShellCmd: return "shell";
-            case Nodes::String: return "string";
-            case Nodes::Variable: return "variable";
-            case Nodes::When: return "when";
-            case Nodes::While: return "while";
-            case Nodes::Skip: return "skip";
-            case Nodes::Return: return "return";
-            case Nodes::Break: return "break";
-            case Nodes::Class: return "class";
+            case NodeType::NumberLiteral: return "Number";
+            case NodeType::ArrayLiteral: return "array";
+            case NodeType::AssignmentExpr: return "assignment";
+            case NodeType::BinaryOperation: return "binary";
+            case NodeType::FunctionCall: return "call";
+            case NodeType::ObjectProperty: return "element";
+            case NodeType::EqualityCheck: return "equality";
+            case NodeType::FunctionDeclaration: return "function";
+            case NodeType::IdentifierExpr: return "identifier";
+            case NodeType::IfStatement: return "if";
+            case NodeType::MemberAccess: return "member";
+            case NodeType::ObjectLiteral: return "Object";
+            case NodeType::ProgramRoot: return "program";
+            case NodeType::ShellCommand: return "shell";
+            case NodeType::StringLiteral: return "String";
+            case NodeType::VariableDeclaration: return "variable";
+            case NodeType::WhenStatement: return "when";
+            case NodeType::WhileLoop: return "while";
+            case NodeType::SkipStatement: return "skip";
+            case NodeType::ReturnStatement: return "return";
+            case NodeType::BreakStatement: return "break";
             default: return "unknown";
         }
     }

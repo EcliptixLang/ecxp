@@ -17,6 +17,13 @@ Lexer::~Lexer(){
 std::map<std::string, TokenType> Keywords()
 {
     KeywordList keywords;
+    keywords["Number"] = TokenType::Type;
+    keywords["Float"] = TokenType::Type;
+    keywords["Boolean"] = TokenType::Type;
+    keywords["String"] = TokenType::Type;
+    keywords["Array"] = TokenType::Type;
+    keywords["Object"] = TokenType::Type;
+
     keywords["set"] = TokenType::Set;
     keywords["lock"] = TokenType::Lock;
     keywords["fun"] = TokenType::Fun;

@@ -6,17 +6,17 @@ PAST Parser::ParsePrimary() {
 
         switch (token.type) {
             case TokenType::Identifier:
-				return std::make_shared<AST::Identifier>(AST::Identifier(this->nextToken().value));
+				return std::make_shared<AST::IdentifierExpr>(this->nextToken().value);
             case TokenType::Number:
-                return std::make_shared<AST::NumberExpr>(AST::NumberExpr(std::stod(this->nextToken().value)));
+                return std::make_shared<AST::NumberLiteral>(std::stod(this->nextToken().value));
 			case TokenType::Break:
 				this->nextToken();
-                return std::make_shared<AST::Break>(AST::Break());
+                return std::make_shared<AST::BreakStatement>();
 			case TokenType::String:
-				return std::make_shared<AST::StringExpr>(AST::StringExpr(this->nextToken().value));
+				return std::make_shared<AST::StringLiteral>(this->nextToken().value);
 			case TokenType::Return:
 				this->nextToken();
-				return std::make_shared<AST::ReturnExpr>(this->ParseExpression());
+				return std::make_shared<AST::ReturnStatement>(this->ParseExpression());
 
 			case TokenType::OpenParen:{
 				this->nextToken();
@@ -27,7 +27,7 @@ PAST Parser::ParsePrimary() {
 				if(this->currentToken().type == TokenType::ComparativeOperator){
 					oper = this->nextToken();
 					right = this->ParseExpression();
-					value = std::make_shared<AST::EquExpr>(left, right, oper);
+					value = std::make_shared<AST::EqualityCheckExpr>(left, right, oper);
 				}else {
 					value = left;
 				}
@@ -35,7 +35,7 @@ PAST Parser::ParsePrimary() {
 				return value;
 			}
             default:
-                std::cout << "\033[31mParser Error\033[0m: Unexpected token found during parsing\n- Value: \033[36m" << this->currentToken().value << "\033[0m\n- Type: \033[36m" << lexer.StringifyTokenTypes(this->currentToken().type) << "\033[0m\n- past: " << lexer.StringifyTokenTypes(this->lastToken.type) << "\n";
+                std::cout << "\033[31mParser Error\033[0m: Unexpected token found during parsing\n- Value: \033[36m" << this->currentToken().value << "\033[0m\n- Type: \033[36m" << lexer.StringifyTokenTypes(this->currentToken().type) << "\033[0m\n- past: " << lexer.StringifyTokenTypes(this->lastToken.type) << std::endl;
                 exit(1);
         }
 }

@@ -1,31 +1,29 @@
 #include "../executor.hpp"
 
-using Nodes = AST::Nodes; 
+using NodeType = AST::NodeType; 
 using string = std::string;
 
-std::shared_ptr<Values::Runtime> Interpreter::IBinary(std::shared_ptr<AST::ExprAST>& astNode, Environment& env){
-	AST::BinaryExpr* binexp = dynamic_cast<AST::BinaryExpr*>(astNode.get());
-
-	std::shared_ptr<Values::Runtime> lhs = this->evaluate(binexp->LHS, env);
-	std::shared_ptr<Values::Runtime> rhs = this->evaluate(binexp->RHS, env);
+std::shared_ptr<Values::Runtime> Interpreter::evaluateBinaryOperation(const AST::BinaryOperationExpr& node, std::shared_ptr<Runtime::Environment> &env){
+	std::shared_ptr<Values::Runtime> lhs = this->evaluate(node.lhs, env);
+	std::shared_ptr<Values::Runtime> rhs = this->evaluate(node.rhs, env);
 
 	string lhsType = lhs->type();
 	string rhsType = rhs->type();
 
-	if(lhs->type() == "number" && rhs->type() == "number"){
+	if(lhs->type() == "Number" && rhs->type() == "Number"){
 		int result;
 		 Values::Number* numl = dynamic_cast<Values::Number*>(lhs.get());
 		Values::Number* numr = dynamic_cast<Values::Number*>(rhs.get());
-		if(binexp->Op == '+'){
-			result = numl->value + numr->value;
-		} else if(binexp->Op == '-'){
-			result = numl->value - numr->value;
-		} else if(binexp->Op == '*'){
-			result = numl->value * numr->value;
-		} else if(binexp->Op == '/'){
-			result = numl->value / numr->value;
+		if(node.op == '+'){
+			result = numl->value() + numr->value();
+		} else if(node.op == '-'){
+			result = numl->value() - numr->value();
+		} else if(node.op == '*'){
+			result = numl->value() * numr->value();
+		} else if(node.op == '/'){
+			result = numl->value() / numr->value();
 		} else {
-			std::cout << "Unknown expression: " << numl->value << " " << binexp->Op << " " << numr->value << "\n"; 
+			std::cout << "Unknown expression: " << numl->value() << " " << node.op << " " << numr->value() << "\n"; 
 		}
 
 		return std::make_shared<Values::Number>(Values::Number(result));
@@ -36,7 +34,7 @@ std::shared_ptr<Values::Runtime> Interpreter::IBinary(std::shared_ptr<AST::ExprA
 		string lhsType = lhs->type();
 		string rhsType = rhs->type();
 		string value = "";
-		if((lhsType != "function" || lhsType != "object") && (rhsType != "function" || rhsType != "object")){
+		if((lhsType != "function" || lhsType != "Object") && (rhsType != "function" || rhsType != "Object")){
 			value.append(lhs->stringValue()).append(rhs->stringValue());
 		} else {
 			value = "null";

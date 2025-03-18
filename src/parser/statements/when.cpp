@@ -15,5 +15,5 @@ PAST Parser::parseWhen() {
 
 		this->expectToken(TokenType::CloseBrace);
 
-		return std::make_shared<AST::WhenDeclaration>(conditional, _operator, consequent);
+		return std::make_shared<AST::WhenStatement>(conditional, _operator, consequent);
 	}

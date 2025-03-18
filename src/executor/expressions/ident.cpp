@@ -1,11 +1,8 @@
 #include "../executor.hpp"
-using Nodes = AST::Nodes; 
+using NodeType = AST::NodeType; 
 using string = std::string;
 
-std::shared_ptr<Values::Runtime> Interpreter::IIdent(std::shared_ptr<AST::ExprAST>& astNode, Environment& env){
-	AST::Identifier * ident = dynamic_cast<AST::Identifier*>(astNode.get());
-	std::shared_ptr<Values::Runtime> val = env.getVariable(ident->name).value;
-    env.setVariableSafe(ident->name, val);
-    
+std::shared_ptr<Values::Runtime> Interpreter::evaluateIdentifier(const AST::IdentifierExpr& node, std::shared_ptr<Runtime::Environment> &env){
+	std::shared_ptr<Values::Runtime> val = env->get(node.name).value;
 	return val;
 }

@@ -1,39 +1,74 @@
 #pragma once
+
 #include <memory>
 #include <unordered_map>
 #include <string>
 #include <vector>
 #include <stdexcept>
+#include <mutex>
 #include "../values.hpp"
+
+namespace Runtime {
+
+class EnvironmentException : public std::runtime_error {
+public:
+    using std::runtime_error::runtime_error;
+};
+
+class VariableNotFound : public EnvironmentException {
+public:
+    explicit VariableNotFound(const std::string& name)
+        : EnvironmentException("Variable not found: " + name) {}
+};
+
+class ConstModificationError : public EnvironmentException {
+public:
+    explicit ConstModificationError(const std::string& name)
+        : EnvironmentException("Cannot modify constant variable: " + name) {}
+};
 
 struct Variable {
     std::string name;
     std::shared_ptr<Values::Runtime> value;
-    bool constant;
-    std::string type;
+    bool is_constant;
+    
+    Variable clone() const {
+        return {name, value ? value->clone() : nullptr, is_constant};
+    }
 };
 
-struct thingy {
-    std::shared_ptr<AST::ExprAST> cond;
-    std::vector<std::shared_ptr<AST::ExprAST>> consequent;
+class Environment : public std::enable_shared_from_this<Environment> {
+public:
+    using Ptr = std::shared_ptr<Environment>;
+    
+    explicit Environment(Ptr parent = nullptr);
+    
+    Ptr get_parent() const noexcept;
+    void set_parent(Ptr parent) noexcept;
+    size_t parent_depth() const noexcept;
+    
+    Variable get(const std::string& name) const;
+    bool exists(const std::string& name) const noexcept;
+    void set(const std::string& name, 
+            std::shared_ptr<Values::Runtime> value,
+            bool is_constant = false);
+    void safe_set(const std::string& name,
+                 std::shared_ptr<Values::Runtime> value);
+    
+    std::unordered_map<std::string, Variable> get_all_variables() const;
+    void merge(const Environment& other);
+    
+    Variable thread_safe_get(const std::string& name) const;
+    void thread_safe_set(const std::string& name,
+                        std::shared_ptr<Values::Runtime> value,
+                        bool is_constant = false);
+
+private:
+    mutable std::mutex mutex_{};
+    Ptr parent_;
+    std::unordered_map<std::string, Variable> variables_;
+    
+    Variable find_variable(const std::string& name) const;
 };
 
-class Environment {
-    public:
-        void setup();
-        Environment* getParent();
-        int variableCount();
-        void setParent(Environment* Parent);
-        Variable getVariable(const std::string& varname);
-        std::vector<Variable> getVariables();
-        int parentCount(int num = 0);
-        void setVariableSafe(const std::string& varname, std::shared_ptr<Values::Runtime> vallo, bool constant = false);
-        void setVariable(const std::string& varname, std::shared_ptr<Values::Runtime> vallo, std::string type, bool constant = false);
-        std::map<std::string, thingy> events;
-        std::vector<std::shared_ptr<Values::Runtime>> classes;
-    private:
-    Environment* parent = nullptr;
-    std::vector<Variable> variables;
-};
-
-typedef void(*create)(Environment&);
+}

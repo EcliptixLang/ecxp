@@ -20,8 +20,8 @@ PAST Parser::parseObjects() {
 			if (this->currentToken().type == TokenType::Comma) {
 				this->nextToken(); 
 				map.push_back(
-					std::make_shared<AST::Element>(
-						AST::Element(
+					std::make_shared<AST::ObjectProperty>(
+						AST::ObjectProperty(
 							key, nullptr
 						)
 					)
@@ -30,8 +30,8 @@ PAST Parser::parseObjects() {
 			} 
 			else if (this->currentToken().type == TokenType::CloseBrace) {
 				map.push_back(
-					std::make_shared<AST::Element>(
-						AST::Element(
+					std::make_shared<AST::ObjectProperty>(
+						AST::ObjectProperty(
 							key, nullptr
 						)
 					)
@@ -44,7 +44,7 @@ PAST Parser::parseObjects() {
 			PAST value = 
 				this->ParseExpression();
       		map.push_back(
-				std::make_shared<AST::Element>(key, value)
+				std::make_shared<AST::ObjectProperty>(key, value)
 			);
 			if(
 				this->currentToken().type != 
@@ -53,5 +53,5 @@ PAST Parser::parseObjects() {
 		}
 
 		this->expectToken(TokenType::CloseBrace);
-		return std::make_shared<AST::Object>(map);
+		return std::make_shared<AST::ObjectLiteral>(map);
 	}

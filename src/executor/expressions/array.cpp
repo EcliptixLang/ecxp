@@ -1,13 +1,12 @@
 #include "../executor.hpp"
 
-using Nodes = AST::Nodes; 
+using NodeType = AST::NodeType; 
 using string = std::string;
 
-std::shared_ptr<Values::Runtime> Interpreter::IArray(std::shared_ptr<AST::ExprAST>& astNode, Environment& env){
-	AST::Array* arr = dynamic_cast<AST::Array*>(astNode.get());
+std::shared_ptr<Values::Runtime> Interpreter::evaluateArrayLiteral(const AST::ArrayLiteral& node, std::shared_ptr<Runtime::Environment> &env){
 	std::vector<std::shared_ptr<Values::Runtime>> array{};
 
-	for(auto& val : arr->elements){
+	for(auto& val : node.elements){
 		std::shared_ptr<Values::Runtime> v = this->evaluate(val, env);
 		array.push_back(v);
 	}

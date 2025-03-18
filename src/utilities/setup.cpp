@@ -8,13 +8,14 @@
 // #include <raylib/raylib.h>
 #define _NORAYLIB
 
-using Nodes = AST::Nodes; 
+using NodeType = AST::NodeType; 
 using string = std::string;
 using Values::Null;
 using Values::Number;
 using Values::Boolean;
 using Values::Object;
 using Values::String;
+using Values::FunctionCallback;
 #define RuntimeVal std::shared_ptr<Values::Runtime>
 
 template <typename T>
@@ -46,7 +47,7 @@ void LogExit(std::string errorname, int exitCode = 0){
 
 RuntimeVal ECLIPTIX_ShowFPS(FunctionCallback* callback){
     auto args = callback->parsedArgs;
-    if (!ValType(args[0], "number") || !ValType(args[1], "number")){
+    if (!ValType(args[0], "Number") || !ValType(args[1], "Number")){
         LogExit(callback->name.append(" Errored out: one of its values is not a number.").c_str(), 1);
     }
 
@@ -82,7 +83,7 @@ RuntimeVal ECLIPTIX_EndDrawing(FunctionCallback* callback){
 
 RuntimeVal ECLIPTIX_DrawTriangle(FunctionCallback* callback){
     auto args = callback->parsedArgs;
-    if (!ValType(args[0], "object") || !ValType(args[1], "object") || !ValType(args[2], "object") || !ValType(args[3], "object")){
+    if (!ValType(args[0], "Object") || !ValType(args[1], "Object") || !ValType(args[2], "Object") || !ValType(args[3], "Object")){
         callback->Errorout(", one of its values is not an object.", 1);
     }
 
@@ -99,10 +100,10 @@ RuntimeVal ECLIPTIX_DrawTriangle(FunctionCallback* callback){
         callback->Errorout("One of the objects given are null.");
     }
 
-    if(!ValType(a->props["x"], "number") || !ValType(a->props["y"], "number") 
-        || !ValType(b->props["x"], "number") || !ValType(b->props["y"], "number") 
-        || !ValType(c->props["x"], "number") || !ValType(c->props["y"], "number")
-        || !ValType(d->props["r"], "number") || !ValType(d->props["g"], "number") || !ValType(d->props["b"], "number")
+    if(!ValType(a->props["x"], "Number") || !ValType(a->props["y"], "Number") 
+        || !ValType(b->props["x"], "Number") || !ValType(b->props["y"], "Number") 
+        || !ValType(c->props["x"], "Number") || !ValType(c->props["y"], "Number")
+        || !ValType(d->props["r"], "Number") || !ValType(d->props["g"], "Number") || !ValType(d->props["b"], "Number")
         ) {
         LogExit("drawTriangle(o1, o2, o3, c) Errored out: a point on c is is not a number.", 1);
     }
@@ -128,7 +129,7 @@ RuntimeVal ECLIPTIX_DrawTriangle(FunctionCallback* callback){
 
 RuntimeVal ECLIPTIX_DrawRect(FunctionCallback* callback){
     auto args = callback->parsedArgs;
-    if (!ValType(args[0], "object") || !ValType(args[1], "object")){
+    if (!ValType(args[0], "Object") || !ValType(args[1], "Object")){
         callback->Errorout("one of its values is not an object.");
     }
 
@@ -142,13 +143,13 @@ RuntimeVal ECLIPTIX_DrawRect(FunctionCallback* callback){
         callback->Errorout("Color of Rectangle is null (or badly formatted*).\n col: { r, g, b }");
     }
 
-    if(!ValType(a->props["x"], "number") 
-        || !ValType(a->props["y"], "number") 
-        || !ValType(a->props["height"], "number") 
-        || !ValType(a->props["width"], "number") 
-        || !ValType(b->props["r"], "number") 
-        || !ValType(b->props["g"], "number") 
-        || !ValType(b->props["b"], "number")
+    if(!ValType(a->props["x"], "Number") 
+        || !ValType(a->props["y"], "Number") 
+        || !ValType(a->props["height"], "Number") 
+        || !ValType(a->props["width"], "Number") 
+        || !ValType(b->props["r"], "Number") 
+        || !ValType(b->props["g"], "Number") 
+        || !ValType(b->props["b"], "Number")
     ) {
         DisplayErrorMessageBox("drawRectangle(rec, col) Errored out: a point on col is is not a number.");
         exit(1);
@@ -171,7 +172,7 @@ RuntimeVal ECLIPTIX_DrawRect(FunctionCallback* callback){
 
 RuntimeVal ECLIPTIX_DrawRectRounded(FunctionCallback* callback){
     auto args = callback->parsedArgs;
-    if (!ValType(args[0], "object") || !ValType(args[1], "object") || !ValType(args[2], "number")){
+    if (!ValType(args[0], "Object") || !ValType(args[1], "Object") || !ValType(args[2], "Number")){
         callback->Errorout("one of its values is not an object.");
     }
 
@@ -186,11 +187,11 @@ RuntimeVal ECLIPTIX_DrawRectRounded(FunctionCallback* callback){
         callback->Errorout("Color of Rectangle is null (or badly formatted*).\n col: { r, g, b }");
     }
 
-    if(!ValType(a->props["x"], "number") || !ValType(a->props["y"], "number") 
-        || !ValType(a->props["height"], "number") || a->props["width"]->type() != "number"){
+    if(!ValType(a->props["x"], "Number") || !ValType(a->props["y"], "Number") 
+        || !ValType(a->props["height"], "Number") || a->props["width"]->type() != "Number"){
         callback->Errorout("a point on rec is not a number.");
     }
-    if(!ValType(b->props["r"], "number") || !ValType(b->props["g"], "number") || !ValType(b->props["b"], "number")){
+    if(!ValType(b->props["r"], "Number") || !ValType(b->props["g"], "Number") || !ValType(b->props["b"], "Number")){
         callback->Errorout("a point on col is is not a number.");
     }
 
@@ -273,12 +274,12 @@ RuntimeVal ECLIPTIX_Ask(FunctionCallback* callback){
     
     int ans_n;
 
-    if (callback->parsedArgs[1]->stringValue() == "number")
+    if (callback->parsedArgs[1]->stringValue() == "Number")
         std::cin >> ans_n;
     else
         std::cin >> ans_s;
     
-    if (callback->parsedArgs[1]->stringValue() == "number")
+    if (callback->parsedArgs[1]->stringValue() == "Number")
         return createValue<Number>(Values::Number(ans_n));
     else
         return createValue<String>(Values::String(ans_s));
@@ -306,7 +307,7 @@ RuntimeVal ECLIPTIX_ReadFile(FunctionCallback* callback){
 
 RuntimeVal ECLIPTIX_WriteFile(FunctionCallback* callback){
     auto args = callback->parsedArgs;
-    if(!ValType(args[0], "string") && !ValType(args[1], "string")){
+    if(!ValType(args[0], "String") && !ValType(args[1], "String")){
         std::cout << "Cannot read a non string\n";
         exit(6);
     }
@@ -318,24 +319,24 @@ RuntimeVal ECLIPTIX_WriteFile(FunctionCallback* callback){
 
 RuntimeVal ECLIPTIX_Wait(FunctionCallback* callback){
     auto args = callback->parsedArgs;
-    if(args[0]->type() != "number"){
+    if(args[0]->type() != "Number"){
         std::cout << "Cannot read a non number\n";
         exit(6);
     }
 
-    std::this_thread::sleep_for(std::chrono::duration(std::chrono::seconds(switchNumber(args[0])->value)));
+    std::this_thread::sleep_for(std::chrono::duration(std::chrono::seconds(switchNumber(args[0])->value())));
 
     return createNull();
 }
 
 RuntimeVal ECLIPTIX_Exit(FunctionCallback* callback){
     auto args = callback->parsedArgs;
-    if(args[0]->type() != "number"){
+    if(args[0]->type() != "Number"){
         std::cout << "Cannot read a non number\n";
         exit(6);
     }
 
-    exit(switchNumber(args[0])->value);
+    exit(switchNumber(args[0])->value());
 }
 
 RuntimeVal ECLIPTIX_ErrLog(FunctionCallback* callback){
@@ -355,14 +356,13 @@ RuntimeVal ECLIPTIX_ErrLog(FunctionCallback* callback){
     return createNull();
 }
 
-
 std::map<std::string, RuntimeVal> ErrorStuff;
 std::map<std::string, RuntimeVal> ConsoleStuff;
 std::map<std::string, RuntimeVal> FileStuff;
 std::map<std::string, RuntimeVal> ProcessStuff;
 std::map<std::string, RuntimeVal> ProjectStuff;
 
-void Environment::setup(){
+void setup(std::shared_ptr<Runtime::Environment>& env){
     ErrorStuff["throw"]      =  std::make_shared<Values::NativeFN>(ECLIPTIX_Throw);
     ErrorStuff["out"]        =  std::make_shared<Values::NativeFN>(ECLIPTIX_ErrLog);
 	ConsoleStuff["out"]      =  std::make_shared<Values::NativeFN>(ECLIPTIX_Log);
@@ -372,14 +372,14 @@ void Environment::setup(){
     ProcessStuff["exit"]     =  std::make_shared<Values::NativeFN>(ECLIPTIX_Exit);
     ProcessStuff["wait"]     =  std::make_shared<Values::NativeFN>(ECLIPTIX_Wait);
 
-	this->setVariableSafe("error", std::make_shared<Values::Object>(Values::Object(ErrorStuff)), true);
-	this->setVariableSafe("console", std::make_shared<Values::Object>(Values::Object(ConsoleStuff)), true);
-	this->setVariableSafe("file", std::make_shared<Values::Object>(Values::Object(FileStuff)), true);
-    this->setVariableSafe("process", std::make_shared<Values::Object>(Values::Object(ProcessStuff)), true);
+	env->safe_set("error", std::make_shared<Values::Object>(Values::Object(ErrorStuff)));
+	env->safe_set("console", std::make_shared<Values::Object>(Values::Object(ConsoleStuff)));
+	env->safe_set("file", std::make_shared<Values::Object>(Values::Object(FileStuff)));
+    env->safe_set("process", std::make_shared<Values::Object>(Values::Object(ProcessStuff)));
     #ifndef _NORAYLIB
-        this->setVariableSafe("Window", std::make_shared<NativeFN>(ECLIPTIX_CreateWindow), true);
+        env->safe_set("Window", std::make_shared<NativeFN>(ECLIPTIX_CreateWindow));
     #endif
-	this->setVariableSafe("null", std::make_shared<Values::Null>(Values::Null()), true);
-	this->setVariableSafe("true", std::make_shared<Values::Boolean>(Values::Boolean(true)), true);
-	this->setVariableSafe("false", std::make_shared<Values::Boolean>(Values::Boolean(false)), true);
+	env->safe_set("null", std::make_shared<Values::Null>(Values::Null()));
+	env->safe_set("true", std::make_shared<Values::Boolean>(Values::Boolean(true)));
+	env->safe_set("false", std::make_shared<Values::Boolean>(Values::Boolean(false)));
 }

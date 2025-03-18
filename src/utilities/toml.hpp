@@ -37,7 +37,6 @@ private:
     Value parseValue(const std::string& raw) {
         Value val;
 
-        // Check if array
         if (raw.front() == '[' && raw.back() == ']') {
             val.type = Value::Type::Array;
             std::string items = raw.substr(1, raw.length() - 2);
@@ -45,7 +44,6 @@ private:
             std::string item;
 
             while (std::getline(ss, item, ',')) {
-                // Trim whitespace and quotes
                 item.erase(0, item.find_first_not_of(" \t\""));
                 item.erase(item.find_last_not_of(" \t\"") + 1);
                 val.arrayVal.push_back(item);
@@ -53,13 +51,11 @@ private:
             return val;
         }
 
-        // Check if integer
         try {
             val.intVal = std::stoll(raw);
             val.type = Value::Type::Integer;
             return val;
         } catch (...) {
-            // Not an integer
         }
 
 		try {
@@ -67,10 +63,8 @@ private:
             val.type = Value::Type::Boolean;
             return val;
         } catch (...) {
-            // Not a boolean
         }
 
-        // Default to string
         val.type = Value::Type::String;
         val.strVal = raw;
         return val;
@@ -134,7 +128,6 @@ public:
                 std::string key = line.substr(0, delimPos);
                 std::string rawValue = line.substr(delimPos + 1);
 
-                // Trim whitespace
                 key.erase(0, key.find_first_not_of(" \t"));
                 key.erase(key.find_last_not_of(" \t") + 1);
                 rawValue.erase(0, rawValue.find_first_not_of(" \t"));

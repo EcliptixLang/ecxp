@@ -7,7 +7,7 @@
 class Parser {
     public:
         Parser() {}
-        std::shared_ptr<AST::Program> produceAST(std::string& sourceCode);
+        std::shared_ptr<AST::ProgramRoot> produceAST(std::string& sourceCode);
         Lexer lexer;
     private:
         int pos = 0;
@@ -23,8 +23,6 @@ class Parser {
         Token expectOne(TokenType type1, TokenType type2);
 
         std::shared_ptr<AST::ExprAST> ParseStatement();
-        std::shared_ptr<AST::ExprAST> ParseClassStatement();
-        std::shared_ptr<AST::ExprAST> ParseClass();
         std::shared_ptr<AST::ExprAST> parseWhen();
         std::shared_ptr<AST::ExprAST> parseWhile();
         std::shared_ptr<AST::ExprAST> parseIf();

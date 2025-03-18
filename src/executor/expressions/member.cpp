@@ -1,34 +1,24 @@
 #include "../executor.hpp"
 
-using Nodes = AST::Nodes; 
+using NodeType = AST::NodeType; 
 using string = std::string;
 
-std::shared_ptr<Values::Runtime> Interpreter::IMember(std::shared_ptr<AST::ExprAST>& astNode, Environment& env){
-	if(astNode == nullptr){
-		std::cout << "astNode in IMember is a null std::shared_ptr jsyk\n";
-	}
-	AST::MemberExpr* mem = dynamic_cast<AST::MemberExpr*>(astNode.get());
-
-	std::shared_ptr<Values::Runtime> val = this->evaluate(mem->object, env);
-	if(val == nullptr){
-		std::cout << "value coming from IMember is a null std::shared_ptr jsyk\n";
-	}
-	AST::Identifier* id = dynamic_cast<AST::Identifier*>(mem->property.get());
+std::shared_ptr<Values::Runtime> Interpreter::evaluateMemberAccess(const AST::MemberAccessExpr& node, std::shared_ptr<Runtime::Environment> &env){
+	std::shared_ptr<Values::Runtime> val = this->evaluate(node.object, env);
+	AST::IdentifierExpr* id = dynamic_cast<AST::IdentifierExpr*>(node.property.get());
 	string sym = id->name;
 
-	if(val->type() == "object"){
+	if(val->type() == "Object"){
 		Values::Object* obj = dynamic_cast<Values::Object*>(val.get());
-		std::shared_ptr<Values::Runtime> value = obj->props[sym];
-
-		if(value != nullptr){
-			return value;
-		} else {
-			std::cout << "Property " << sym << " doesn't exist on the object" << ".\n";
-			exit(2);
-		}
+		auto it = obj->properties().find(sym);
+        if (it != obj->properties().end()) {
+            return it->second;
+        } else {
+            throw InterpreterError("Property '" + sym + "' doesn't exist on object");
+        }
 	} else {
-		if(val->type() == "string"){
-			string value = dynamic_cast<Values::String*>(val.get())->value;
+		if(val->type() == "String"){
+			string value = dynamic_cast<Values::String*>(val.get())->value();
 			return val;
 		}
 	}

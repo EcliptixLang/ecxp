@@ -1,23 +1,12 @@
 #include "../executor.hpp"
 
-using Nodes = AST::Nodes; 
+using NodeType = AST::NodeType;
 using string = std::string;
 
-std::shared_ptr<Values::Runtime> Interpreter::IProgram(std::shared_ptr<AST::ExprAST>& astNode, Environment& env) {
-    string a = AST::stringifyAST(astNode->getType());
-	AST::Program* program = dynamic_cast<AST::Program*>(astNode.get());
-    if (!program) {
-        throw std::runtime_error("Invalid AST Node: Expected AST::Program.");
+std::shared_ptr<Values::Runtime> Interpreter::evaluateProgramRoot(const AST::ProgramRoot& node, std::shared_ptr<Runtime::Environment> &env) {
+    std::shared_ptr<Values::Runtime> lastResult = std::make_shared<Values::Null>();
+    for (const auto& expr : node.body) {
+        lastResult = evaluateChild(expr, env);
     }
-    
-    int i = 0;
-    std::shared_ptr<Values::Runtime> val;
-
-    while (i < program->body.size()) {
-        std::shared_ptr<AST::ExprAST> expr = program->body[i];
-        val = this->evaluate(expr, env);
-        i++;
-    }
-
-    return val;
+    return lastResult;
 }

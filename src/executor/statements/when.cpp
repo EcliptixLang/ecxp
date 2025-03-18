@@ -1,12 +1,12 @@
 #include "../executor.hpp"
 
-using Nodes = AST::Nodes; 
+using NodeType = AST::NodeType; 
 using string = std::string;
 
 bool trotli(std::shared_ptr<Values::Runtime>& conditional){
 	if(conditional->type() == "boolean"){
 		Values::Boolean* cond = dynamic_cast<Values::Boolean*>(conditional.get());
-		const bool boolean = cond->value;
+		const bool boolean = cond->value();
 		if(boolean) return true; 
 		else return false;
 	}
@@ -33,14 +33,12 @@ std::string gen_random(const int len) {
     return tmp_s;
 }
 
-std::shared_ptr<Values::Runtime> Interpreter::IWhen(std::shared_ptr<AST::ExprAST>& astNode, Environment& env){
+std::shared_ptr<Values::Runtime> Interpreter::evaluateWhenStatement(const AST::WhenStatement& node, std::shared_ptr<Runtime::Environment> &env){
     bool truu = true;
-    AST::WhenDeclaration* whilee = dynamic_cast<AST::WhenDeclaration*>(astNode.get());
-
-    Environment enva; enva.setParent(&env); enva.setup();
-    std::shared_ptr<Values::Runtime> cond = this->evaluate(whilee->conditional, env);
-        std::shared_ptr<AST::ExprAST> clone = whilee->clone();
-        AST::WhenDeclaration* wil = dynamic_cast<AST::WhenDeclaration*>(clone.get());
+    auto enva = std::make_shared<Runtime::Environment>(env);
+    std::shared_ptr<Values::Runtime> cond = this->evaluate(node.condition, env);
+        std::shared_ptr<AST::ExprAST> clone = node.clone();
+        AST::WhenStatement* wil = dynamic_cast<AST::WhenStatement*>(clone.get());
         std::vector<std::shared_ptr<AST::ExprAST>> thingy = wil->consequent;
         if(trotli(cond)){
             for(auto& thing : thingy){
@@ -51,8 +49,6 @@ std::shared_ptr<Values::Runtime> Interpreter::IWhen(std::shared_ptr<AST::ExprAST
                     }
                 }
             }
-        } else {
-            env.events[gen_random(5)] = { whilee->conditional, whilee->consequent };
-        }
+        } else {}
     return std::make_shared<Values::Null>(Values::Null());
 }

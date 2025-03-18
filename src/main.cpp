@@ -1,16 +1,13 @@
 #include "parser/parser.hpp"
-#include "compiler/compiler.hpp"
 #include "executor/executor.hpp"
 #include "ast.hpp"
 #include <iostream>
-
-// temp
 
 struct GlobalConfig {
     bool debug = false;
 };
 
-// temp
+void setup(std::shared_ptr<Runtime::Environment>& env);
 
 int main(int argc, char* argv[]){
     GlobalConfig conf;
@@ -24,15 +21,10 @@ int main(int argc, char* argv[]){
     Parser parser;
     std::shared_ptr<AST::ExprAST> prog = parser.produceAST(file);
 
-    if(args.hasFlag("-c") || args.hasFlag("--compile")){
-        Compiler compiler;
-        compiler.compile(prog);
-        compiler.save(args.getFlagValues("-o")[0]);
-    } else {
-        Interpreter irpr;
-        Environment env;
-        irpr.evaluate(prog, env);
-    }
+    Interpreter irpr;
+    auto env = std::make_shared<Runtime::Environment>();
+    setup(env);
+    irpr.evaluate(prog, env);
 
     return 0;
 }

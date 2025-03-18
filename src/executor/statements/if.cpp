@@ -1,12 +1,12 @@
 #include "../executor.hpp"
 
-using Nodes = AST::Nodes; 
+using NodeType = AST::NodeType; 
 using string = std::string;
 
 bool truthy(std::shared_ptr<Values::Runtime>& conditional){
 	if(conditional->type() == "boolean"){
 		Values::Boolean* cond = dynamic_cast<Values::Boolean*>(conditional.get());
-		const bool boolean = cond->value;
+		const bool boolean = cond->value();
 		if(boolean) return true; 
 		else return false;
 	}
@@ -18,14 +18,12 @@ bool truthy(std::shared_ptr<Values::Runtime>& conditional){
 	}
 }
 
-std::shared_ptr<Values::Runtime> Interpreter::IIf(std::shared_ptr<AST::ExprAST>& astNode, Environment& env){
+std::shared_ptr<Values::Runtime> Interpreter::evaluateIfStatement(const AST::IfStatement& node, std::shared_ptr<Runtime::Environment> &env){
 	std::shared_ptr<Values::Runtime> val;
-	AST::IfStatement* whilee = dynamic_cast<AST::IfStatement*>(astNode.get());
-	Environment enva; enva.setParent(&env); enva.setup();
-	std::shared_ptr<Values::Runtime> cond = this->evaluate(whilee->conditional, enva);
-	std::cout << cond->type() << " " << cond->stringValue() << " " << truthy(cond) << "\n";
+	auto enva = std::make_shared<Runtime::Environment>(env);
+	std::shared_ptr<Values::Runtime> cond = this->evaluate(node.condition, enva);
 	if(truthy(cond)){
-		for(auto& thing : whilee->consequent){
+		for(auto& thing : node.consequent){
 			val = this->evaluate(thing, enva);
 			if(val != nullptr){
 				if (val->type() == "skip"){
@@ -34,8 +32,8 @@ std::shared_ptr<Values::Runtime> Interpreter::IIf(std::shared_ptr<AST::ExprAST>&
 			}
 		}
 	} else {
-		if(whilee->alternate.size() > 0){
-			for(auto& thing : whilee->alternate){
+		if(node.alternate.size() > 0){
+			for(auto& thing : node.alternate){
 				val = this->evaluate(thing, enva);
 				if(val != nullptr){
 					if (val->type() == "skip"){
