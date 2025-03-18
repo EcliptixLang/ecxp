@@ -1,11 +1,11 @@
-Object window = new Window()
+set Object window = Window()
 
-Number i = 255
+set Number i = 255
 lock Object point1 = { x: 45, y: 200}
 lock Object point2 = { x: 180, y: 60}
 lock Object point3 = { x: 30, y: 40 }
 
-String Loopii(){
+lock String Loopii(){
     i = i - 1
     window.draw.Rectangle({ x: 0, y: 0, width: 800, height: 600 }, { r: 255, g: 255, b: 255 })
     window.debug.showFPS(20, 20)

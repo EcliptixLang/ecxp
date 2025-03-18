@@ -1,9 +1,0 @@
-class Hi {
-    String toString(){
-        console.out("YAYA")
-        return "yay"
-    }
-}
-
-Hi hey()
-console.out(hey)

@@ -1,0 +1,7 @@
+class Hi {
+    Object heyy() {
+        return {
+            yo: "Hi"
+        }
+    }
+}
