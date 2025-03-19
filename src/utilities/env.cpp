@@ -51,6 +51,11 @@ void Environment::set(const std::string& name,
         }
         it->second.value = std::move(value);
         return;
+    } else {
+        if(parent_) {
+            parent_->set(name, std::move(value), is_constant);
+            return;
+        }
     }
     
     variables_.emplace(name, Variable{name, std::move(value), is_constant});

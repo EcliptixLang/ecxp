@@ -38,7 +38,7 @@ namespace Utilities {
 namespace AST {
     std::string stringifyAST(NodeType type){
         switch(type){
-            case NodeType::NumberLiteral: return "Number";
+            case NodeType::NumberLiteral: return "int";
             case NodeType::ArrayLiteral: return "array";
             case NodeType::AssignmentExpr: return "assignment";
             case NodeType::BinaryOperation: return "binary";
@@ -52,7 +52,7 @@ namespace AST {
             case NodeType::ObjectLiteral: return "Object";
             case NodeType::ProgramRoot: return "program";
             case NodeType::ShellCommand: return "shell";
-            case NodeType::StringLiteral: return "String";
+            case NodeType::StringLiteral: return "char*";
             case NodeType::VariableDeclaration: return "variable";
             case NodeType::WhenStatement: return "when";
             case NodeType::WhileLoop: return "while";

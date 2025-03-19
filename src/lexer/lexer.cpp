@@ -3,6 +3,8 @@
 #include <iostream>
 #include <map>
 #include "../config.hpp"
+#include <algorithm>
+#include <cctype>
 #include <string>
 #include <vector>
 
@@ -17,10 +19,10 @@ Lexer::~Lexer(){
 std::map<std::string, TokenType> Keywords()
 {
     KeywordList keywords;
-    keywords["Number"] = TokenType::Type;
+    keywords["int"] = TokenType::Type;
     keywords["Float"] = TokenType::Type;
     keywords["Boolean"] = TokenType::Type;
-    keywords["String"] = TokenType::Type;
+    keywords["char*"] = TokenType::Type;
     keywords["Array"] = TokenType::Type;
     keywords["Object"] = TokenType::Type;
 
@@ -203,7 +205,7 @@ TokenArr Lexer::tokenize(std::string sourceCode)
         case '+':
         case '-':
         case '/':
-            if (src[pos] == '/' && src[pos+1] == '/' || src[pos+1] == '*')
+            if (src[pos] == '/' && (src[pos+1] == '/' || src[pos+1] == '*'))
             {
                 char commentType = src[pos+1];
                 int start = place++;
@@ -237,7 +239,7 @@ TokenArr Lexer::tokenize(std::string sourceCode)
             else
             {
                 std::string idk = "";
-                idk += std::to_string(src[pos++]);
+                idk += src[pos++];
                 tokens.push_back(token(idk, TokenType::BinaryOperator, place++, place));
             }
             break;
@@ -247,7 +249,7 @@ TokenArr Lexer::tokenize(std::string sourceCode)
             {
                 std::string idk = "";
                 int start = place++;
-                while (src.size() > 0 && isalnum(src[pos]))
+                while (src.size() > 0 && (isalnum(src[pos]) || src[pos] == '_' || src[pos] == '*'))
                 {
                     char text = src[pos++];
                     idk += text;
@@ -259,7 +261,9 @@ TokenArr Lexer::tokenize(std::string sourceCode)
                 }
                 else
                 {
-                    tokens.push_back(token(idk, keywords[idk], start, place++));
+                    std::transform(idk.begin(), idk.end(), idk.begin(),
+                        [](unsigned char c){ return std::tolower(c); });
+                    tokens.push_back(token( idk , keywords[idk], start, place++));
                 }
             }
             else if (isdigit(src[pos]))
@@ -268,7 +272,7 @@ TokenArr Lexer::tokenize(std::string sourceCode)
                 int start = place++;
                 while (src.size() > 0 && isdigit(src[pos]))
                 {
-                    idk += std::to_string(src[pos++]);
+                    idk += src[pos++];
                     place++;
                 }
                 tokens.push_back(token(idk, TokenType::Number, start, place++));

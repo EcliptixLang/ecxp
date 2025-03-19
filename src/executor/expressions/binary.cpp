@@ -10,7 +10,7 @@ std::shared_ptr<Values::Runtime> Interpreter::evaluateBinaryOperation(const AST:
 	string lhsType = lhs->type();
 	string rhsType = rhs->type();
 
-	if(lhs->type() == "Number" && rhs->type() == "Number"){
+	if(lhs->type() == "int" && rhs->type() == "int"){
 		int result;
 		 Values::Number* numl = dynamic_cast<Values::Number*>(lhs.get());
 		Values::Number* numr = dynamic_cast<Values::Number*>(rhs.get());

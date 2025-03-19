@@ -76,7 +76,7 @@ public:
 
 class Number final : public ClonableRuntime<Number> {
     int m_value;
-    inline static const std::string TYPE = "number";
+    inline static const std::string TYPE = "int";
     mutable std::string m_stringValue;
     
 public:
@@ -92,7 +92,7 @@ public:
 
 class String final : public ClonableRuntime<String> {
     std::string m_value;
-    inline static const std::string TYPE = "string";
+    inline static const std::string TYPE = "char*";
     
 public:
     explicit String(std::string value) : m_value(std::move(value)) {}

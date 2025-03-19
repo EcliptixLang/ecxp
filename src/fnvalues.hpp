@@ -15,7 +15,7 @@ public:
     std::shared_ptr<::Runtime::Environment> env;
 
     void Errorout(const std::string& error, bool quit = true) noexcept {
-        std::cout << name << " Errored out\n- " << error << std::endl;
+        std::cout << "\033[31m" << name << " errored out\033[0m: \033[36m" << error << "\033[0m" << std::endl;
         if (quit) {
             exit(7);
         }

@@ -79,7 +79,7 @@ private:
 
         void visit(const AST::ShellCommandExpr &node) override
         {
-            // TODO: ADD ENVALUATE SHELEL EXPR FUNCTION
+            result = interpreter.evaluateDSN(node, env);
         }
 
         void visit(const AST::VariableDeclarationExpr &node) override
@@ -142,6 +142,7 @@ private:
     std::shared_ptr<Values::Runtime> evaluateNumberLiteral(const AST::NumberLiteral &node);
     std::shared_ptr<Values::Runtime> evaluateStringLiteral(const AST::StringLiteral &node);
     std::shared_ptr<Values::Runtime> evaluateIdentifier(const AST::IdentifierExpr &node, std::shared_ptr<Runtime::Environment> &env);
+    std::shared_ptr<Values::Runtime> evaluateDSN(const AST::ShellCommandExpr &node, std::shared_ptr<Runtime::Environment> &env);
     std::shared_ptr<Values::Runtime> evaluateBinaryOperation(const AST::BinaryOperationExpr &node, std::shared_ptr<Runtime::Environment> &env);
     std::shared_ptr<Values::Runtime> evaluateFunctionCall(const AST::FunctionCallExpr &node, std::shared_ptr<Runtime::Environment> &env);
     std::shared_ptr<Values::Runtime> evaluateIfStatement(const AST::IfStatement &node, std::shared_ptr<Runtime::Environment> &env);

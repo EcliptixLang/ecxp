@@ -47,15 +47,15 @@ bool hasNullObjects(std::vector<std::string> objs, std::map<std::string, std::sh
 }
 
 namespace Values {
-    std::string runtimeToJson(const std::shared_ptr<Runtime>& runtime) {
+    std::string runtimeToJson(const std::shared_ptr<Values::Runtime>& runtime) {
         const std::string& type = runtime->type();
         if (type == "null") {
             return "null";
         } else if (type == "Boolean") {
             return dynamic_cast<const Boolean*>(runtime.get())->stringValue();
-        } else if (type == "Number") {
+        } else if (type == "int") {
             return dynamic_cast<const Number*>(runtime.get())->stringValue();
-        } else if (type == "String") {
+        } else if (type == "char*") {
             return "\"" + dynamic_cast<const String*>(runtime.get())->stringValue() + "\"";
         } else if (type == "Object") {
             const Object* obj = dynamic_cast<const Object*>(runtime.get());
@@ -71,7 +71,7 @@ namespace Values {
         return "\"<unknown>\"";
     }
 
-    std::string arrayToJson(const std::vector<std::shared_ptr<Runtime>>& elements) {
+    std::string arrayToJson(const std::vector<std::shared_ptr<Values::Runtime>>& elements) {
         std::string json = "[";
         bool first = true;
         for (const auto& element : elements) {
@@ -83,7 +83,7 @@ namespace Values {
         return json;
     }
 
-    std::string mapToJson(const std::map<std::string, std::shared_ptr<Runtime>>& map) {
+    std::string mapToJson(const std::map<std::string, std::shared_ptr<Values::Runtime>>& map) {
         std::string json = "{";
         bool first = true;
         for (const auto& [key, value] : map) {

@@ -17,7 +17,7 @@ std::shared_ptr<Values::Runtime> Interpreter::evaluateMemberAccess(const AST::Me
             throw InterpreterError("Property '" + sym + "' doesn't exist on object");
         }
 	} else {
-		if(val->type() == "String"){
+		if(val->type() == "char*"){
 			string value = dynamic_cast<Values::String*>(val.get())->value();
 			return val;
 		}

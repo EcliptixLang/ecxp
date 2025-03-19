@@ -10,7 +10,7 @@ bool isTruthy(std::shared_ptr<Values::Runtime>& left, Token op, std::shared_ptr<
 	} else if(oap == "!="){
 		return left->stringValue() != right->stringValue();	
 	} else if(oap == ">="){
-		if(left->type() == "Number" && right->type() == "Number"){
+		if(left->type() == "int" && right->type() == "int"){
 			int l = dynamic_cast<Values::Number*>(left.get())->value();
 			int r = dynamic_cast<Values::Number*>(right.get())->value();
 			return l >= r;
@@ -20,7 +20,7 @@ bool isTruthy(std::shared_ptr<Values::Runtime>& left, Token op, std::shared_ptr<
 			return false;
 		}
 	} else if(oap == "<="){
-		if(left->type() == "Number" && right->type() == "Number"){
+		if(left->type() == "int" && right->type() == "int"){
 			int l = dynamic_cast<Values::Number*>(left.get())->value();
 			int r = dynamic_cast<Values::Number*>(right.get())->value();
 			return l <= r;
@@ -41,7 +41,7 @@ bool isTruthy(std::shared_ptr<Values::Runtime>& left, Token op, std::shared_ptr<
 			return false;
 		}
 	} else if(oap == "<"){
-		if(left->type() == "Number" && right->type() == "Number"){
+		if(left->type() == "int" && right->type() == "int"){
 			int l = dynamic_cast<Values::Number*>(left.get())->value();
 			int r = dynamic_cast<Values::Number*>(right.get())->value();
 			return l < r;
@@ -51,7 +51,7 @@ bool isTruthy(std::shared_ptr<Values::Runtime>& left, Token op, std::shared_ptr<
 			return false;
 		}
 	} else if(oap == ">") {
-		if(left->type() == "Number" && right->type() == "Number"){
+		if(left->type() == "int" && right->type() == "int"){
 			int l = dynamic_cast<Values::Number*>(left.get())->value();
 			int r = dynamic_cast<Values::Number*>(right.get())->value();
 			return l > r;

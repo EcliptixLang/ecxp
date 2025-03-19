@@ -15,8 +15,8 @@ struct InterpreterSettings {
 };
 
 struct TypeSettings {
-    std::string string = "String";
-    std::string number = "Number";
+    std::string string = "char*";
+    std::string number = "int";
     std::string object = "Object";
     std::string array = "Array";
     std::string boolean = "Boolean";
