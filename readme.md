@@ -1,21 +1,6 @@
 # Ecliptix
 
-The only language you'd want to use. It has way too many features that are planned yet a few actually implemented.
-
-## List of functions
-
-- error:
-  - error.throw(error: string)
-  - error.out(...content: auto)
-- process:
-  - process.wait(seconds: number)
-  - process.exit(code: number)
-- console:
-  - console.out(...content: auto)
-  - console.ask(...question: auto)
-- file:
-  - file.read(filename: string)
-  - file.write(filename: string, content: string)
+A Programming language.
 
 ## List of features
 
@@ -27,6 +12,19 @@ The only language you'd want to use. It has way too many features that are plann
 - [x] Math
 - [x] Objects
 
+## Building
+### Prerequisites
+- CMake
+- Any C++ Compiler
+
+### Commands
+```
+mkdir build
+cd build
+cmake ..
+cmake --build .
+```
+
 ## Planned features
 
 - [ ] Structures
@@ -34,4 +32,3 @@ The only language you'd want to use. It has way too many features that are plann
 - [ ] When statements
 - [ ] Custom Types
 - [ ] Compilation
-https://github.com/EcliptixLang/ecxp/tree/aedd9d813c47ced670db85d7197d17e30d14056f/refactor
