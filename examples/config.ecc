@@ -8,7 +8,7 @@ max_when = 10
 use_new_syntax = true
 
 [types]
-string = "String"
+string = "char*"
 number = "Numbah"
 object = "Object"
 array = "Array"
