@@ -27,7 +27,7 @@ std::shared_ptr<T> createValue(T thing){
 }
 
 
-void setup(Runtime::Environment& env){
+void setup(Environment& env){
     #ifdef STD_CONSOLE
         std::map<std::string, std::unique_ptr<Values::Runtime>> ConsoleStuff;
         ConsoleStuff["ask"]         =  std::make_unique<Values::NativeFN>(Console::ask);

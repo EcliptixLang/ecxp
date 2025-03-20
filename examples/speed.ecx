@@ -1,5 +1,4 @@
 int woohooo = 0
 while(woohooo != 10000000){
     woohooo = woohooo + 1
-    console.out(woohooo)
 }

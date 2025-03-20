@@ -1,4 +1,3 @@
-#define STD_CONSOLE
 #ifdef STD_CONSOLE
 #include "../../values.hpp"
 #include "../../fnvalues.hpp"

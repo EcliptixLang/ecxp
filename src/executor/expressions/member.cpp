@@ -5,7 +5,7 @@ using string = std::string;
 
 std::unique_ptr<Values::Runtime> Interpreter::evaluateMemberAccess(
     const AST::MemberAccessExpr& node, 
-    Runtime::Environment& env
+    Environment& env
 ) {
     std::unique_ptr<Values::Runtime> val = this->evaluate(node.object, env);
     

@@ -8,7 +8,7 @@ struct GlobalConfig {
     bool debug = false;
 };
 
-void setup(Runtime::Environment& env);
+void setup(Environment& env);
 
 int main(int argc, char* argv[]){
     GlobalConfig conf;
@@ -23,7 +23,7 @@ int main(int argc, char* argv[]){
     std::shared_ptr<AST::ExprAST> prog = parser.produceAST(file);
 
     Interpreter irpr;
-    Runtime::Environment env(nullptr);
+    Environment env(nullptr);
     setup(env);
     Console::Async::start();
     irpr.evaluate(prog, env);

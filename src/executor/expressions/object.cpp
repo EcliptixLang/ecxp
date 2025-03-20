@@ -3,7 +3,7 @@
 using NodeType = AST::NodeType; 
 using string = std::string;
 
-std::unique_ptr<Values::Runtime> Interpreter::evaluateObjectLiteral(const AST::ObjectLiteral& node, Runtime::Environment& env){
+std::unique_ptr<Values::Runtime> Interpreter::evaluateObjectLiteral(const AST::ObjectLiteral& node, Environment& env){
 	std::map<string, std::unique_ptr<Values::Runtime>> props;
 
 	for (const auto& val : node.properties) {

@@ -33,6 +33,6 @@ std::string gen_random(const int len) {
     return tmp_s;
 }
 
-std::unique_ptr<Values::Runtime> Interpreter::evaluateWhenStatement(const AST::WhenStatement& node, Runtime::Environment& env){
+std::unique_ptr<Values::Runtime> Interpreter::evaluateWhenStatement(const AST::WhenStatement& node, Environment& env){
     return std::make_unique<Values::Null>();
 }

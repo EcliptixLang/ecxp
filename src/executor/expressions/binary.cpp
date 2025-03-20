@@ -3,7 +3,7 @@
 using NodeType = AST::NodeType; 
 using string = std::string;
 
-std::unique_ptr<Values::Runtime> Interpreter::evaluateBinaryOperation(const AST::BinaryOperationExpr& node, Runtime::Environment& env){
+std::unique_ptr<Values::Runtime> Interpreter::evaluateBinaryOperation(const AST::BinaryOperationExpr& node, Environment& env){
 	std::unique_ptr<Values::Runtime> lhs = this->evaluate(node.lhs, env);
 	std::unique_ptr<Values::Runtime> rhs = this->evaluate(node.rhs, env);
 

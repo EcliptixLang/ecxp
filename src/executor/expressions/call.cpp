@@ -5,7 +5,7 @@ using NodeType = AST::NodeType;
 using namespace Values;
 
 std::unique_ptr<Values::Runtime> Interpreter::evaluateFunctionCall(const AST::FunctionCallExpr& node,
-                                                          Runtime::Environment& env) {
+                                                          Environment& env) {
     std::vector<std::unique_ptr<Values::Runtime>> args;
     args.reserve(node.arguments.size());
     for (auto& arg : node.arguments) {

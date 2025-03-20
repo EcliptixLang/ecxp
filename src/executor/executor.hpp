@@ -18,13 +18,13 @@ class Interpreter
 public:
     std::unique_ptr<Values::Runtime> evaluate(
         const std::shared_ptr<AST::ExprAST> &astNode,
-        Runtime::Environment& env);
+        Environment& env);
 
 private:
     class EvalVisitor : public AST::Visitor
     {
     public:
-        EvalVisitor(Interpreter &interpreter, Runtime::Environment& env)
+        EvalVisitor(Interpreter &interpreter, Environment& env)
             : interpreter(interpreter), env(env) {}
 
         void visit(const AST::NumberLiteral &node) override
@@ -136,26 +136,26 @@ private:
 
         std::unique_ptr<Values::Runtime> result;
         Interpreter &interpreter;
-        Runtime::Environment& env;
+        Environment& env;
     };
 
     std::unique_ptr<Values::Runtime> evaluateNumberLiteral(const AST::NumberLiteral &node);
     std::unique_ptr<Values::Runtime> evaluateStringLiteral(const AST::StringLiteral &node);
-    std::unique_ptr<Values::Runtime> evaluateIdentifier(const AST::IdentifierExpr &node, Runtime::Environment& env);
-    std::unique_ptr<Values::Runtime> evaluateDSN(const AST::ShellCommandExpr &node, Runtime::Environment& env);
-    std::unique_ptr<Values::Runtime> evaluateBinaryOperation(const AST::BinaryOperationExpr &node, Runtime::Environment& env);
-    std::unique_ptr<Values::Runtime> evaluateFunctionCall(const AST::FunctionCallExpr &node, Runtime::Environment& env);
-    std::unique_ptr<Values::Runtime> evaluateIfStatement(const AST::IfStatement &node, Runtime::Environment& env);
-    std::unique_ptr<Values::Runtime> evaluateFunctionDeclaration(const AST::FunctionDeclaration &node, Runtime::Environment& env);
-    std::unique_ptr<Values::Runtime> evaluateObjectLiteral(const AST::ObjectLiteral &node, Runtime::Environment& env);
-    std::unique_ptr<Values::Runtime> evaluateArrayLiteral(const AST::ArrayLiteral &node, Runtime::Environment& env);
-    std::unique_ptr<Values::Runtime> evaluateMemberAccess(const AST::MemberAccessExpr &node, Runtime::Environment& env);
-    std::unique_ptr<Values::Runtime> evaluateWhileLoop(const AST::WhileLoop &node, Runtime::Environment& env);
-    std::unique_ptr<Values::Runtime> evaluateWhenStatement(const AST::WhenStatement &node, Runtime::Environment& env);
-    std::unique_ptr<Values::Runtime> evaluateAssignment(const AST::AssignmentExpr &node, Runtime::Environment& env);
-    std::unique_ptr<Values::Runtime> evaluateProgramRoot(const AST::ProgramRoot &node, Runtime::Environment& env);
-    std::unique_ptr<Values::Runtime> evaluateEqualityExpression(const AST::EqualityCheckExpr &node, Runtime::Environment& env);
-    std::unique_ptr<Values::Runtime> evaluateVariableDeclaration(const AST::VariableDeclarationExpr &node, Runtime::Environment& env);
+    std::unique_ptr<Values::Runtime> evaluateIdentifier(const AST::IdentifierExpr &node, Environment& env);
+    std::unique_ptr<Values::Runtime> evaluateDSN(const AST::ShellCommandExpr &node, Environment& env);
+    std::unique_ptr<Values::Runtime> evaluateBinaryOperation(const AST::BinaryOperationExpr &node, Environment& env);
+    std::unique_ptr<Values::Runtime> evaluateFunctionCall(const AST::FunctionCallExpr &node, Environment& env);
+    std::unique_ptr<Values::Runtime> evaluateIfStatement(const AST::IfStatement &node, Environment& env);
+    std::unique_ptr<Values::Runtime> evaluateFunctionDeclaration(const AST::FunctionDeclaration &node, Environment& env);
+    std::unique_ptr<Values::Runtime> evaluateObjectLiteral(const AST::ObjectLiteral &node, Environment& env);
+    std::unique_ptr<Values::Runtime> evaluateArrayLiteral(const AST::ArrayLiteral &node, Environment& env);
+    std::unique_ptr<Values::Runtime> evaluateMemberAccess(const AST::MemberAccessExpr &node, Environment& env);
+    std::unique_ptr<Values::Runtime> evaluateWhileLoop(const AST::WhileLoop &node, Environment& env);
+    std::unique_ptr<Values::Runtime> evaluateWhenStatement(const AST::WhenStatement &node, Environment& env);
+    std::unique_ptr<Values::Runtime> evaluateAssignment(const AST::AssignmentExpr &node, Environment& env);
+    std::unique_ptr<Values::Runtime> evaluateProgramRoot(const AST::ProgramRoot &node, Environment& env);
+    std::unique_ptr<Values::Runtime> evaluateEqualityExpression(const AST::EqualityCheckExpr &node, Environment& env);
+    std::unique_ptr<Values::Runtime> evaluateVariableDeclaration(const AST::VariableDeclarationExpr &node, Environment& env);
 
     template <typename T>
     const T &verifyNode(const std::shared_ptr<AST::ExprAST> &node) const
@@ -170,7 +170,7 @@ private:
 
     std::unique_ptr<Values::Runtime> evaluateChild(
         const std::shared_ptr<AST::ExprAST> &node,
-        Runtime::Environment& env)
+        Environment& env)
     {
         return evaluate(node, env);
     }

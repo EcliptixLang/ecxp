@@ -61,7 +61,7 @@ using namespace Values;
 
 std::unique_ptr<Values::Runtime> Interpreter::evaluate(
     const std::shared_ptr<ExprAST>& astNode,
-    Runtime::Environment& env
+    Environment& env
 ) {
     try {
         EvalVisitor visitor(*this, env);

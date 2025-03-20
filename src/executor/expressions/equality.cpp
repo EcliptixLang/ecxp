@@ -66,7 +66,7 @@ bool isTruthy(std::unique_ptr<Values::Runtime>& left, Token op, std::unique_ptr<
 	return false;
 }
 
-std::unique_ptr<Values::Runtime> Interpreter::evaluateEqualityExpression(const AST::EqualityCheckExpr& node, Runtime::Environment& env){
+std::unique_ptr<Values::Runtime> Interpreter::evaluateEqualityExpression(const AST::EqualityCheckExpr& node, Environment& env){
 	std::unique_ptr<Values::Runtime> left = this->evaluate(node.left, env);
 	std::unique_ptr<Values::Runtime> right = this->evaluate(node.right, env);
 

@@ -1,4 +1,3 @@
-#define STD_FILE
 #ifdef STD_FILE
 #include "../../values.hpp"
 #include "../../fnvalues.hpp"

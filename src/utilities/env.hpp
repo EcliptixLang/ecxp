@@ -8,7 +8,7 @@
 #include <mutex>
 #include "../values.hpp"
 
-namespace Runtime {
+namespace Exceptions {
 
 class EnvironmentException : public std::runtime_error {
 public:
@@ -27,6 +27,7 @@ public:
         : EnvironmentException("Cannot modify constant variable: " + name) {}
 };
 
+};
 class Environment {
     public:
         explicit Environment(const Environment* parent = nullptr) 
@@ -71,4 +72,3 @@ class Environment {
         
         std::unordered_map<std::string, Variable> variables_;
     };
-};

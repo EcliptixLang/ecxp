@@ -3,7 +3,7 @@
 using NodeType = AST::NodeType; 
 using string = std::string;
 
-std::unique_ptr<Values::Runtime> Interpreter::evaluateAssignment(const AST::AssignmentExpr& node, Runtime::Environment& env){
+std::unique_ptr<Values::Runtime> Interpreter::evaluateAssignment(const AST::AssignmentExpr& node, Environment& env){
 	if(node.target->nodeType() != AST::NodeType::IdentifierExpr){
 		std::cout << "\033[31mInterpreter Error\033[0m: \033[36mInvalid Assignment\033[0m" << std::endl;
 	}

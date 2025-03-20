@@ -18,7 +18,7 @@ bool truthy(std::unique_ptr<Values::Runtime>& conditional){
 	}
 }
 
-std::unique_ptr<Values::Runtime> Interpreter::evaluateIfStatement(const AST::IfStatement& node, Runtime::Environment& env){
+std::unique_ptr<Values::Runtime> Interpreter::evaluateIfStatement(const AST::IfStatement& node, Environment& env){
 	std::unique_ptr<Values::Runtime> val;
 	env.enter_scope();
 	std::unique_ptr<Values::Runtime> cond = this->evaluate(node.condition, env);

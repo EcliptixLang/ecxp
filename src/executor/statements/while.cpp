@@ -18,7 +18,7 @@ bool troti(Values::Runtime* conditional) {
 
 std::unique_ptr<Values::Runtime> Interpreter::evaluateWhileLoop(
     const AST::WhileLoop& node, 
-    Runtime::Environment& env
+    Environment& env
 ) {
     while (true) {
         auto cond = evaluate(node.condition, env);
