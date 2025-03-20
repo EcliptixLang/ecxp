@@ -8,5 +8,6 @@ namespace Console {
     namespace Async {
         void start();
         void stop();
+        void log(const std::string& message);
     };
 };

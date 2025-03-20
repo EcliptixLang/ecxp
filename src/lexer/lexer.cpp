@@ -20,11 +20,11 @@ std::map<std::string, TokenType> Keywords()
 {
     KeywordList keywords;
     keywords["int"] = TokenType::Type;
-    keywords["Float"] = TokenType::Type;
-    keywords["Boolean"] = TokenType::Type;
+    keywords["float"] = TokenType::Type;
+    keywords["bool"] = TokenType::Type;
     keywords["char*"] = TokenType::Type;
-    keywords["Array"] = TokenType::Type;
-    keywords["Object"] = TokenType::Type;
+    keywords["vector"] = TokenType::Type;
+    keywords["object"] = TokenType::Type;
 
     keywords["set"] = TokenType::Set;
     keywords["lock"] = TokenType::Lock;
