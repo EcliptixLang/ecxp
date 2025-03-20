@@ -22,7 +22,7 @@ add_definitions(
     -D STD_ECLIPTIX
     -D STD_FILE
 #   -D STD_GRAPHICS
-#   -D STD_MATH
+   -D STD_MATH
 )
 
 list(FILTER Sources EXCLUDE REGEX "/CMakeFiles/")
@@ -32,6 +32,6 @@ add_library(ecx STATIC ${Sources})
 
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
-add_executable(ecxp "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp" ${Sources})
+add_executable(ecxp "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
 
 target_link_libraries(ecxp PRIVATE ecx)
