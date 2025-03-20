@@ -7,8 +7,8 @@
 using Values::FunctionCallback;
 
 namespace Console {
-    std::shared_ptr<Values::Runtime> error(FunctionCallback* callback){
-        auto args = callback->parsedArgs;
+    std::unique_ptr<Values::Runtime> error(FunctionCallback* callback){
+        auto& args = callback->parsedArgs;
 
         for(auto& arg : args){
             std::cerr << arg->stringValue();

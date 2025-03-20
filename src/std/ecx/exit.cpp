@@ -7,9 +7,9 @@
 using Values::FunctionCallback;
 
 namespace Ecliptix {
-        std::shared_ptr<Values::Runtime> exit(FunctionCallback* callback){
-        auto args = callback->parsedArgs;
-        if(args[0]->type() != "int"){
+        std::unique_ptr<Values::Runtime> exit(FunctionCallback* callback){
+        auto &args = callback->parsedArgs;
+        if(!ValType(args[0], Values::Type::Number)){
             std::cout << "Cannot read a non number\n";
             ::exit(6);
         }

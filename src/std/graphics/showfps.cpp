@@ -3,9 +3,9 @@
 #include "../../executor/executor.hpp"
 
 namespace Graphics {
-    std::shared_ptr<Values::Runtime> showFPS(FunctionCallback* callback){
-        auto args = callback->parsedArgs;
-        if (!ValType(args[0], "int") || !ValType(args[1], "int")){
+    std::unique_ptr<Values::Runtime> showFPS(FunctionCallback* callback){
+        auto& args = callback->parsedArgs;
+        if (!ValType(args[0], Values::Type::Number) || !ValType(args[1], Values::Type::Number)){
             callback->Errorout("one of its values is not a number.");
         }
 

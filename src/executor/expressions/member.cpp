@@ -3,24 +3,33 @@
 using NodeType = AST::NodeType; 
 using string = std::string;
 
-std::shared_ptr<Values::Runtime> Interpreter::evaluateMemberAccess(const AST::MemberAccessExpr& node, std::shared_ptr<Runtime::Environment> &env){
-	std::shared_ptr<Values::Runtime> val = this->evaluate(node.object, env);
-	AST::IdentifierExpr* id = dynamic_cast<AST::IdentifierExpr*>(node.property.get());
-	string sym = id->name;
+std::unique_ptr<Values::Runtime> Interpreter::evaluateMemberAccess(
+    const AST::MemberAccessExpr& node, 
+    Runtime::Environment& env
+) {
+    std::unique_ptr<Values::Runtime> val = this->evaluate(node.object, env);
+    
+    AST::IdentifierExpr* id = static_cast<AST::IdentifierExpr*>(node.property.get());
+    if (!id) throw InterpreterError("Invalid member access property");
+    string sym = id->name;
 
-	if(val->type() == "Object"){
-		Values::Object* obj = dynamic_cast<Values::Object*>(val.get());
-		auto it = obj->properties().find(sym);
-        if (it != obj->properties().end()) {
-            return it->second;
-        } else {
-            throw InterpreterError("Property '" + sym + "' doesn't exist on object");
+    if (val->type() == Values::Type::Object) {
+        Values::Object* obj = static_cast<Values::Object*>(val.get());
+        const auto& props = obj->properties();
+        
+        if (auto it = props.find(sym); it != props.end()) {
+            return it->second->clone();
         }
-	} else {
-		if(val->type() == "char*"){
-			string value = dynamic_cast<Values::String*>(val.get())->value();
-			return val;
-		}
-	}
-	throw std::runtime_error("Cannot access property on non-object value");
+        throw InterpreterError("Property '" + sym + "' doesn't exist on object");
+    }
+    else if (val->type() == Values::Type::String) {
+        Values::String* str = static_cast<Values::String*>(val.get());
+        
+        if (sym == "length") {
+            return std::make_unique<Values::Number>(str->value().size());
+        }
+        throw InterpreterError("Strings only have 'length' property");
+    }
+    
+    throw InterpreterError("Cannot access property on non-object value");
 }

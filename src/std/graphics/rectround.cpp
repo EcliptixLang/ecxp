@@ -2,9 +2,9 @@
 #include "graphics.hpp"
 
 namespace Graphics {
-    std::shared_ptr<Values::Runtime> drawRectRounded(FunctionCallback* callback){
-        auto args = callback->parsedArgs;
-        if (!ValType(args[0], "Object") || !ValType(args[1], "Object") || !ValType(args[2], "int")){
+    std::unique_ptr<Values::Runtime> drawRectRounded(FunctionCallback* callback){
+        auto& args = callback->parsedArgs;
+        if (!ValType(args[0], "Object") || !ValType(args[1], "Object") || !ValType(args[2], Values::Type::Number)){
             callback->Errorout("one of its values is not an object.");
         }
 

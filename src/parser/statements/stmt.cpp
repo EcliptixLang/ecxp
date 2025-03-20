@@ -43,7 +43,7 @@ PAST Parser::ParseStatement()
 		{
 			if (thingy->nodeType() == AST::NodeType::IdentifierExpr)
 			{
-				AST::IdentifierExpr *id = dynamic_cast<AST::IdentifierExpr*>(thingy.get());
+				AST::IdentifierExpr *id = static_cast<AST::IdentifierExpr*>(thingy.get());
 				items.push_back(id->name);
 			}
 		}

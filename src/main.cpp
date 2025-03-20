@@ -1,5 +1,6 @@
 #include "parser/parser.hpp"
 #include "executor/executor.hpp"
+#include "std/console/asink.hpp"
 #include "ast.hpp"
 #include <iostream>
 
@@ -7,7 +8,7 @@ struct GlobalConfig {
     bool debug = false;
 };
 
-void setup(std::shared_ptr<Runtime::Environment>& env);
+void setup(Runtime::Environment& env);
 
 int main(int argc, char* argv[]){
     GlobalConfig conf;
@@ -22,9 +23,10 @@ int main(int argc, char* argv[]){
     std::shared_ptr<AST::ExprAST> prog = parser.produceAST(file);
 
     Interpreter irpr;
-    auto env = std::make_shared<Runtime::Environment>();
+    Runtime::Environment env(nullptr);
     setup(env);
+    Console::Async::start();
     irpr.evaluate(prog, env);
-
+    Console::Async::stop();
     return 0;
 }

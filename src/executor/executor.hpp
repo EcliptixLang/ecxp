@@ -16,15 +16,15 @@ public:
 class Interpreter
 {
 public:
-    std::shared_ptr<Values::Runtime> evaluate(
+    std::unique_ptr<Values::Runtime> evaluate(
         const std::shared_ptr<AST::ExprAST> &astNode,
-        std::shared_ptr<Runtime::Environment> &env);
+        Runtime::Environment& env);
 
 private:
     class EvalVisitor : public AST::Visitor
     {
     public:
-        EvalVisitor(Interpreter &interpreter, std::shared_ptr<Runtime::Environment> &env)
+        EvalVisitor(Interpreter &interpreter, Runtime::Environment& env)
             : interpreter(interpreter), env(env) {}
 
         void visit(const AST::NumberLiteral &node) override
@@ -134,33 +134,33 @@ private:
         {
         }
 
-        std::shared_ptr<Values::Runtime> result;
+        std::unique_ptr<Values::Runtime> result;
         Interpreter &interpreter;
-        std::shared_ptr<Runtime::Environment> &env;
+        Runtime::Environment& env;
     };
 
-    std::shared_ptr<Values::Runtime> evaluateNumberLiteral(const AST::NumberLiteral &node);
-    std::shared_ptr<Values::Runtime> evaluateStringLiteral(const AST::StringLiteral &node);
-    std::shared_ptr<Values::Runtime> evaluateIdentifier(const AST::IdentifierExpr &node, std::shared_ptr<Runtime::Environment> &env);
-    std::shared_ptr<Values::Runtime> evaluateDSN(const AST::ShellCommandExpr &node, std::shared_ptr<Runtime::Environment> &env);
-    std::shared_ptr<Values::Runtime> evaluateBinaryOperation(const AST::BinaryOperationExpr &node, std::shared_ptr<Runtime::Environment> &env);
-    std::shared_ptr<Values::Runtime> evaluateFunctionCall(const AST::FunctionCallExpr &node, std::shared_ptr<Runtime::Environment> &env);
-    std::shared_ptr<Values::Runtime> evaluateIfStatement(const AST::IfStatement &node, std::shared_ptr<Runtime::Environment> &env);
-    std::shared_ptr<Values::Runtime> evaluateFunctionDeclaration(const AST::FunctionDeclaration &node, std::shared_ptr<Runtime::Environment> &env);
-    std::shared_ptr<Values::Runtime> evaluateObjectLiteral(const AST::ObjectLiteral &node, std::shared_ptr<Runtime::Environment> &env);
-    std::shared_ptr<Values::Runtime> evaluateArrayLiteral(const AST::ArrayLiteral &node, std::shared_ptr<Runtime::Environment> &env);
-    std::shared_ptr<Values::Runtime> evaluateMemberAccess(const AST::MemberAccessExpr &node, std::shared_ptr<Runtime::Environment> &env);
-    std::shared_ptr<Values::Runtime> evaluateWhileLoop(const AST::WhileLoop &node, std::shared_ptr<Runtime::Environment> &env);
-    std::shared_ptr<Values::Runtime> evaluateWhenStatement(const AST::WhenStatement &node, std::shared_ptr<Runtime::Environment> &env);
-    std::shared_ptr<Values::Runtime> evaluateAssignment(const AST::AssignmentExpr &node, std::shared_ptr<Runtime::Environment> &env);
-    std::shared_ptr<Values::Runtime> evaluateProgramRoot(const AST::ProgramRoot &node, std::shared_ptr<Runtime::Environment> &env);
-    std::shared_ptr<Values::Runtime> evaluateEqualityExpression(const AST::EqualityCheckExpr &node, std::shared_ptr<Runtime::Environment> &env);
-    std::shared_ptr<Values::Runtime> evaluateVariableDeclaration(const AST::VariableDeclarationExpr &node, std::shared_ptr<Runtime::Environment> &env);
+    std::unique_ptr<Values::Runtime> evaluateNumberLiteral(const AST::NumberLiteral &node);
+    std::unique_ptr<Values::Runtime> evaluateStringLiteral(const AST::StringLiteral &node);
+    std::unique_ptr<Values::Runtime> evaluateIdentifier(const AST::IdentifierExpr &node, Runtime::Environment& env);
+    std::unique_ptr<Values::Runtime> evaluateDSN(const AST::ShellCommandExpr &node, Runtime::Environment& env);
+    std::unique_ptr<Values::Runtime> evaluateBinaryOperation(const AST::BinaryOperationExpr &node, Runtime::Environment& env);
+    std::unique_ptr<Values::Runtime> evaluateFunctionCall(const AST::FunctionCallExpr &node, Runtime::Environment& env);
+    std::unique_ptr<Values::Runtime> evaluateIfStatement(const AST::IfStatement &node, Runtime::Environment& env);
+    std::unique_ptr<Values::Runtime> evaluateFunctionDeclaration(const AST::FunctionDeclaration &node, Runtime::Environment& env);
+    std::unique_ptr<Values::Runtime> evaluateObjectLiteral(const AST::ObjectLiteral &node, Runtime::Environment& env);
+    std::unique_ptr<Values::Runtime> evaluateArrayLiteral(const AST::ArrayLiteral &node, Runtime::Environment& env);
+    std::unique_ptr<Values::Runtime> evaluateMemberAccess(const AST::MemberAccessExpr &node, Runtime::Environment& env);
+    std::unique_ptr<Values::Runtime> evaluateWhileLoop(const AST::WhileLoop &node, Runtime::Environment& env);
+    std::unique_ptr<Values::Runtime> evaluateWhenStatement(const AST::WhenStatement &node, Runtime::Environment& env);
+    std::unique_ptr<Values::Runtime> evaluateAssignment(const AST::AssignmentExpr &node, Runtime::Environment& env);
+    std::unique_ptr<Values::Runtime> evaluateProgramRoot(const AST::ProgramRoot &node, Runtime::Environment& env);
+    std::unique_ptr<Values::Runtime> evaluateEqualityExpression(const AST::EqualityCheckExpr &node, Runtime::Environment& env);
+    std::unique_ptr<Values::Runtime> evaluateVariableDeclaration(const AST::VariableDeclarationExpr &node, Runtime::Environment& env);
 
     template <typename T>
     const T &verifyNode(const std::shared_ptr<AST::ExprAST> &node) const
     {
-        auto ptr = dynamic_cast<const T *>(node.get());
+        auto ptr = static_cast<const T *>(node.get());
         if (!ptr)
         {
             throw InterpreterError("Invalid AST node type");
@@ -168,29 +168,12 @@ private:
         return *ptr;
     }
 
-    std::shared_ptr<Values::Runtime> evaluateChild(
+    std::unique_ptr<Values::Runtime> evaluateChild(
         const std::shared_ptr<AST::ExprAST> &node,
-        std::shared_ptr<Runtime::Environment> &env)
+        Runtime::Environment& env)
     {
         return evaluate(node, env);
     }
-
-    class EnvironmentGuard
-    {
-    public:
-        EnvironmentGuard(std::shared_ptr<Runtime::Environment> parent)
-            : newEnv(std::make_shared<Runtime::Environment>()),
-              originalParent(parent->get_parent())
-        {
-            newEnv->set_parent(parent);
-        }
-
-        Runtime::Environment& get() { return *newEnv; }
-
-    private:
-        Runtime::Environment::Ptr newEnv;
-        Runtime::Environment::Ptr originalParent;
-    };
 
 #ifdef INTERPRETER_DEBUG
     void logEvaluation(const std::string &nodeType) const

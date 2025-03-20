@@ -37,9 +37,9 @@ const std::string& nodeTypeTranslate(NodeType type) {
 using NodeType = AST::NodeType; 
 using string = std::string;
 
-bool traoti(std::shared_ptr<Values::Runtime>& conditional){
-	if(conditional->type() == "boolean"){
-		Values::Boolean* cond = dynamic_cast<Values::Boolean*>(conditional.get());
+bool traoti(std::unique_ptr<Values::Runtime>& conditional){
+	if(conditional->type() == Values::Type::Boolean){
+		Values::Boolean* cond = static_cast<Values::Boolean*>(conditional.get());
 		const bool boolean = cond->value();
 		if(boolean) return true; 
 		else return false;
@@ -59,19 +59,18 @@ void runCommand(const string& command) {
 using namespace AST;
 using namespace Values;
 
-std::shared_ptr<Values::Runtime> Interpreter::evaluate(
+std::unique_ptr<Values::Runtime> Interpreter::evaluate(
     const std::shared_ptr<ExprAST>& astNode,
-    std::shared_ptr<Runtime::Environment> &env
+    Runtime::Environment& env
 ) {
     try {
-        EnvironmentGuard guard(env);
         EvalVisitor visitor(*this, env);
         astNode->accept(visitor);
         
         if (!visitor.result) {
-            throw InterpreterError("Evaluation returned null result");
+            throw InterpreterError("Evaluation returned null result " + nodeTypeTranslate(astNode->nodeType()));
         }
-        return visitor.result;
+        return std::move(visitor.result);
     } catch (const InterpreterError& e) {
         throw InterpreterError(std::string("Evaluation failed: ") + e.what());
     }

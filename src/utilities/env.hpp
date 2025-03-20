@@ -27,48 +27,48 @@ public:
         : EnvironmentException("Cannot modify constant variable: " + name) {}
 };
 
-struct Variable {
-    std::string name;
-    std::shared_ptr<Values::Runtime> value;
-    bool is_constant;
-    
-    Variable clone() const {
-        return {name, value ? value->clone() : nullptr, is_constant};
-    }
+class Environment {
+    public:
+        explicit Environment(const Environment* parent = nullptr) 
+            : parent_(parent) {}
+
+        Values::Runtime* get(const std::string& name) const noexcept {
+            if (auto it = variables_.find(name); it != variables_.end()) {
+                return it->second.value.get();
+            }
+            return parent_ ? parent_->get(name) : nullptr;
+        }
+
+        void set(const std::string& name, std::unique_ptr<Values::Runtime> value) {
+            variables_[name].value = std::move(value);
+        }
+
+        template <typename T, typename... Args>
+        void create(const std::string& name, Args&&... args) {
+            variables_[name].value = std::make_unique<T>(std::forward<Args>(args)...);
+        }
+
+        void enter_scope() {
+            if (!child_) {
+                child_ = std::make_unique<Environment>(this);
+            }
+        }
+
+        void leave_scope() {
+            if (child_) {
+                child_.reset();
+            }
+        }
+
+    private:
+        const Environment* parent_;
+        std::unique_ptr<Environment> child_;
+        
+        struct Variable {
+            std::unique_ptr<Values::Runtime> value;
+            bool is_constant = false;
+        };
+        
+        std::unordered_map<std::string, Variable> variables_;
+    };
 };
-
-class Environment : public std::enable_shared_from_this<Environment> {
-public:
-    using Ptr = std::shared_ptr<Environment>;
-    
-    explicit Environment(Ptr parent = nullptr);
-    
-    Ptr get_parent() const noexcept;
-    void set_parent(Ptr parent) noexcept;
-    size_t parent_depth() const noexcept;
-    
-    Variable get(const std::string& name) const;
-    bool exists(const std::string& name) const noexcept;
-    void set(const std::string& name, 
-            std::shared_ptr<Values::Runtime> value,
-            bool is_constant = false);
-    void safe_set(const std::string& name,
-                 std::shared_ptr<Values::Runtime> value);
-    
-    std::unordered_map<std::string, Variable> get_all_variables() const;
-    void merge(const Environment& other);
-    
-    Variable thread_safe_get(const std::string& name) const;
-    void thread_safe_set(const std::string& name,
-                        std::shared_ptr<Values::Runtime> value,
-                        bool is_constant = false);
-
-private:
-    mutable std::mutex mutex_{};
-    Ptr parent_;
-    std::unordered_map<std::string, Variable> variables_;
-    
-    Variable find_variable(const std::string& name) const;
-};
-
-}

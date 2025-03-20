@@ -2,8 +2,8 @@
 #include "graphics.hpp"
 
 namespace Graphics {
-std::shared_ptr<Values::Runtime> drawRect(FunctionCallback* callback){
-    auto args = callback->parsedArgs;
+std::unique_ptr<Values::Runtime> drawRect(FunctionCallback* callback){
+    auto& args = callback->parsedArgs;
     if (!ValType(args[0], "Object") || !ValType(args[1], "Object")){
         callback->Errorout("one of its values is not an object.");
     }

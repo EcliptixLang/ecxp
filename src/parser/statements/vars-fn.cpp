@@ -35,7 +35,7 @@ PAST Parser::ParseNewTypes(){
 				throw "Parameters expected inside function declaration";
 			}
 
-	      	AST::IdentifierExpr* id = dynamic_cast<AST::IdentifierExpr*>(
+	      	AST::IdentifierExpr* id = static_cast<AST::IdentifierExpr*>(
 				arg.get()
 			);
 			

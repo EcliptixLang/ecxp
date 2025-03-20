@@ -11,9 +11,9 @@ using Values::Runtime;
 using Values::String;
 
 namespace File {
-    std::shared_ptr<Values::Runtime> write(FunctionCallback* callback){
-        auto args = callback->parsedArgs;
-        if(!ValType(args[0], "char*") && !ValType(args[1], "char*")){
+    std::unique_ptr<Values::Runtime> write(FunctionCallback* callback){
+        auto& args = callback->parsedArgs;
+        if(!ValType(args[0], Values::Type::String) && !ValType(args[1], Values::Type::String)){
             std::cout << "Cannot read a non string\n";
             exit(6);
         }

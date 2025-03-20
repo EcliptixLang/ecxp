@@ -10,7 +10,7 @@ using Values::String;
 using Values::Number;
 
 namespace Console {
-    std::shared_ptr<Values::Runtime> ask(FunctionCallback* callback){
+    std::unique_ptr<Values::Runtime> ask(FunctionCallback* callback){
         std::cout << callback->parsedArgs[0]->stringValue();
 
         std::string ans_s;
@@ -22,9 +22,9 @@ namespace Console {
             std::cin >> ans_s;
 
         if (callback->parsedArgs[1]->stringValue() == "int")
-            return std::make_shared<Number>(Values::Number(ans_n));
+            return std::make_unique<Number>(ans_n);
         else
-            return std::make_shared<String>(Values::String(ans_s));
+            return std::make_unique<String>(ans_s);
     }
 }
 #endif

@@ -3,9 +3,9 @@
 using NodeType = AST::NodeType; 
 using string = std::string;
 
-bool trotli(std::shared_ptr<Values::Runtime>& conditional){
-	if(conditional->type() == "boolean"){
-		Values::Boolean* cond = dynamic_cast<Values::Boolean*>(conditional.get());
+bool trotli(std::unique_ptr<Values::Runtime>& conditional){
+	if(conditional->type() == Values::Type::Boolean){
+		Values::Boolean* cond = static_cast<Values::Boolean*>(conditional.get());
 		const bool boolean = cond->value();
 		if(boolean) return true; 
 		else return false;
@@ -33,22 +33,6 @@ std::string gen_random(const int len) {
     return tmp_s;
 }
 
-std::shared_ptr<Values::Runtime> Interpreter::evaluateWhenStatement(const AST::WhenStatement& node, std::shared_ptr<Runtime::Environment> &env){
-    bool truu = true;
-    auto enva = std::make_shared<Runtime::Environment>(env);
-    std::shared_ptr<Values::Runtime> cond = this->evaluate(node.condition, env);
-        std::shared_ptr<AST::ExprAST> clone = node.clone();
-        AST::WhenStatement* wil = dynamic_cast<AST::WhenStatement*>(clone.get());
-        std::vector<std::shared_ptr<AST::ExprAST>> thingy = wil->consequent;
-        if(trotli(cond)){
-            for(auto& thing : thingy){
-                std::shared_ptr<Values::Runtime> val = this->evaluate(thing, enva);
-                if(val != nullptr){
-                    if (val->type() == "break"){
-                        break;
-                    }
-                }
-            }
-        } else {}
-    return std::make_shared<Values::Null>(Values::Null());
+std::unique_ptr<Values::Runtime> Interpreter::evaluateWhenStatement(const AST::WhenStatement& node, Runtime::Environment& env){
+    return std::make_unique<Values::Null>();
 }

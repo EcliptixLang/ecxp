@@ -3,14 +3,16 @@
 #include "../../values.hpp"
 #include "../../fnvalues.hpp"
 #include <memory>
-
-using Values::Runtime;
-using Values::FunctionCallback;
+#include <thread>
 
 namespace Console {
-    std::shared_ptr<Values::Runtime> ask(FunctionCallback* callback);
-    std::shared_ptr<Values::Runtime> error(FunctionCallback* callback);
-    std::shared_ptr<Values::Runtime> out(FunctionCallback* callback);
-    std::shared_ptr<Values::Runtime> outraw(FunctionCallback* callback);
+    namespace Async {
+        void start();
+        void stop();
+    };
+    std::unique_ptr<Values::Runtime> ask(Values::FunctionCallback* callback);
+    std::unique_ptr<Values::Runtime> error(Values::FunctionCallback* callback);
+    std::unique_ptr<Values::Runtime> out(Values::FunctionCallback* callback);
+    std::unique_ptr<Values::Runtime> outraw(Values::FunctionCallback* callback);
 };
 #endif

@@ -10,17 +10,17 @@ using Values::Number;
 using Values::FunctionCallback;
 
 namespace Graphics {
-    bool Integrity(std::map<std::string, std::shared_ptr<Values::Runtime>> map, Rectangle &rect);
-    bool Integrity(std::map<std::string, std::shared_ptr<Values::Runtime>> map, Color &col);
-    bool Integrity(std::map<std::string, std::shared_ptr<Values::Runtime>> map, Vector2 &vec);
+    bool Integrity(std::map<std::string, std::unique_ptr<Values::Runtime>> &map, Rectangle &rect);
+    bool Integrity(std::map<std::string, std::unique_ptr<Values::Runtime>> &map, Color &col);
+    bool Integrity(std::map<std::string, std::unique_ptr<Values::Runtime>> &map, Vector2 &vec);
     void log(int msgType, const char *text, va_list args);
 
-    std::shared_ptr<Values::Runtime> loop(FunctionCallback* callback);
-    std::shared_ptr<Values::Runtime> showFPS(FunctionCallback* callback);
-    std::shared_ptr<Values::Runtime> running(FunctionCallback* callback);
-    std::shared_ptr<Values::Runtime> close(FunctionCallback* callback);
-    std::shared_ptr<Values::Runtime> drawTriangle(FunctionCallback* callback);
-    std::shared_ptr<Values::Runtime> drawRectRounded(FunctionCallback* callback);
-    std::shared_ptr<Values::Runtime> drawRect(FunctionCallback* callback);
+    std::unique_ptr<Values::Runtime> loop(FunctionCallback* callback);
+    std::unique_ptr<Values::Runtime> showFPS(FunctionCallback* callback);
+    std::unique_ptr<Values::Runtime> running(FunctionCallback* callback);
+    std::unique_ptr<Values::Runtime> close(FunctionCallback* callback);
+    std::unique_ptr<Values::Runtime> drawTriangle(FunctionCallback* callback);
+    std::unique_ptr<Values::Runtime> drawRectRounded(FunctionCallback* callback);
+    std::unique_ptr<Values::Runtime> drawRect(FunctionCallback* callback);
 };
 #endif

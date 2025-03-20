@@ -2,13 +2,13 @@
 #include "graphics.hpp"
 
 namespace Graphics {
-    bool Integrity(std::map<std::string, std::shared_ptr<Values::Runtime>> map, Rectangle &rect){
+    bool Integrity(std::map<std::string, std::unique_ptr<Values::Runtime>>& map, Rectangle &rect){
         if(hasNullObjects({ "x", "y", "width", "height" }, map)){
             return false;
         }
 
-        if(!ValType(map["x"], "int") || !ValType(map["y"], "int") 
-            || !ValType(map["height"], "int") || map["width"]->type() != "int"){
+        if(!ValType(map["x"], Values::Type::Number) || !ValType(map["y"], Values::Type::Number) 
+            || !ValType(map["height"], Values::Type::Number) || map["width"]->type() != Values::Type::Number){
             return false;
         }
 
@@ -20,12 +20,12 @@ namespace Graphics {
         return true;
     }
 
-    bool Integrity(std::map<std::string, std::shared_ptr<Values::Runtime>> map, Color &col){
+    bool Integrity(std::map<std::string, std::unique_ptr<Values::Runtime>> &map, Color &col){
         if(hasNullObjects({"r", "g", "b"}, map)){
             return false;
         }
 
-        if(!ValType(map["r"], "int") || !ValType(map["g"], "int") || !ValType(map["b"], "int")){
+        if(!ValType(map["r"], Values::Type::Number) || !ValType(map["g"], Values::Type::Number) || !ValType(map["b"], Values::Type::Number)){
             return false;
         }
 
@@ -36,12 +36,12 @@ namespace Graphics {
         return true;
     }
 
-    bool Integrity(std::map<std::string, std::shared_ptr<Values::Runtime>> map, Vector2 &vec){
+    bool Integrity(std::map<std::string, std::unique_ptr<Values::Runtime>> &map, Vector2 &vec){
         if(hasNullObjects({"x", "y"}, map)){
             return false;
         }
 
-        if(!ValType(map["x"], "int") || !ValType(map["y"], "int")){
+        if(!ValType(map["x"], Values::Type::Number) || !ValType(map["y"], Values::Type::Number)){
             return false;
         }
 

@@ -8,7 +8,7 @@ using Values::Runtime;
 using Values::FunctionCallback;
 
 namespace Ecliptix {
-    std::shared_ptr<Values::Runtime> exit(FunctionCallback* callback);
-    std::shared_ptr<Values::Runtime> wait(FunctionCallback* callback);
+    std::unique_ptr<Values::Runtime> exit(FunctionCallback* callback);
+    std::unique_ptr<Values::Runtime> wait(FunctionCallback* callback);
 };
 #endif

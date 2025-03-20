@@ -1,7 +1,7 @@
 #include "../parser.hpp"
 
 PAST Parser::parseCalls(PAST caller) {
-	AST::NumberLiteral* expr = dynamic_cast<AST::NumberLiteral*>(
+	AST::NumberLiteral* expr = static_cast<AST::NumberLiteral*>(
 		caller.get()
 	);
 

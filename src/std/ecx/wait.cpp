@@ -13,9 +13,9 @@ using Values::Runtime;
 using Values::String;
 
 namespace Ecliptix {
-    std::shared_ptr<Values::Runtime> wait(FunctionCallback* callback){
-        auto args = callback->parsedArgs;
-        if(args[0]->type() != "int"){
+    std::unique_ptr<Values::Runtime> wait(FunctionCallback* callback){
+        auto& args = callback->parsedArgs;
+        if(args[0]->type() != Values::Type::Number){
             std::cout << "Cannot read a non number\n";
             exit(6);
         }

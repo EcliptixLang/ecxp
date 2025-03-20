@@ -3,39 +3,41 @@
 using NodeType = AST::NodeType; 
 using string = std::string;
 
-bool troti(std::shared_ptr<Values::Runtime>& conditional){
-	if(conditional->type() == "boolean"){
-		Values::Boolean* cond = dynamic_cast<Values::Boolean*>(conditional.get());
-		const bool boolean = cond->value();
-		if(boolean) return true; 
-		else return false;
-	}
-
-	if(conditional){
-		return true;
-	} else {
-		return false;
-	}
+bool troti(Values::Runtime* conditional) {
+    switch (conditional->type()) {
+        case Values::Type::Boolean: {
+            bool val = static_cast<Values::Boolean*>(conditional)->value();
+            return val;
+        }
+        case Values::Type::Number: {
+            return static_cast<Values::Number*>(conditional)->value() != 0;
+        }
+        default: return conditional != nullptr;
+    }
 }
 
-std::shared_ptr<Values::Runtime> Interpreter::evaluateWhileLoop(const AST::WhileLoop& node, std::shared_ptr<Runtime::Environment> &env){
-    bool truu = true;
-    while(truu){
-        auto enva = std::make_shared<Runtime::Environment>(env);
-        std::shared_ptr<Values::Runtime> cond = this->evaluate(node.condition, env);
-        std::vector<std::shared_ptr<AST::ExprAST>> thingy = node.body;
-        if(troti(cond)){
-            for(auto& thing : thingy){
-                std::shared_ptr<Values::Runtime> val = this->evaluate(thing, enva);
-                if(val != nullptr){
-                    if (val->type() == "break"){
-                        break;
-                    }
-                }
+std::unique_ptr<Values::Runtime> Interpreter::evaluateWhileLoop(
+    const AST::WhileLoop& node, 
+    Runtime::Environment& env
+) {
+    while (true) {
+        auto cond = evaluate(node.condition, env);
+        
+        if (!troti(cond.get())) break;
+        env.enter_scope();        
+
+        const auto& body = node.body;
+        
+        auto end_it = body.end();
+        for (auto it = body.begin(); it != end_it; ++it) {
+            auto result = evaluate(*it, env);
+
+            if (result && result->type() == Values::Type::Break) {
+                env.leave_scope();
+                return std::make_unique<Values::Null>();
             }
-        } else {
-            truu = false;
         }
+        env.leave_scope();
     }
-    return std::make_shared<Values::Null>(Values::Null());
+    return std::make_unique<Values::Null>();
 }

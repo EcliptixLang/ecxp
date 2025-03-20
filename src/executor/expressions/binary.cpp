@@ -3,17 +3,17 @@
 using NodeType = AST::NodeType; 
 using string = std::string;
 
-std::shared_ptr<Values::Runtime> Interpreter::evaluateBinaryOperation(const AST::BinaryOperationExpr& node, std::shared_ptr<Runtime::Environment> &env){
-	std::shared_ptr<Values::Runtime> lhs = this->evaluate(node.lhs, env);
-	std::shared_ptr<Values::Runtime> rhs = this->evaluate(node.rhs, env);
+std::unique_ptr<Values::Runtime> Interpreter::evaluateBinaryOperation(const AST::BinaryOperationExpr& node, Runtime::Environment& env){
+	std::unique_ptr<Values::Runtime> lhs = this->evaluate(node.lhs, env);
+	std::unique_ptr<Values::Runtime> rhs = this->evaluate(node.rhs, env);
 
-	string lhsType = lhs->type();
-	string rhsType = rhs->type();
+	Values::Type lhsType = lhs->type();
+	Values::Type rhsType = rhs->type();
 
-	if(lhs->type() == "int" && rhs->type() == "int"){
+	if(lhsType == Values::Type::Number && rhsType == Values::Type::Number){
 		int result;
-		 Values::Number* numl = dynamic_cast<Values::Number*>(lhs.get());
-		Values::Number* numr = dynamic_cast<Values::Number*>(rhs.get());
+		 Values::Number* numl = static_cast<Values::Number*>(lhs.get());
+		Values::Number* numr = static_cast<Values::Number*>(rhs.get());
 		if(node.op == '+'){
 			result = numl->value() + numr->value();
 		} else if(node.op == '-'){
@@ -26,21 +26,19 @@ std::shared_ptr<Values::Runtime> Interpreter::evaluateBinaryOperation(const AST:
 			std::cout << "Unknown expression: " << numl->value() << " " << node.op << " " << numr->value() << "\n"; 
 		}
 
-		return std::make_shared<Values::Number>(Values::Number(result));
+		return std::make_unique<Values::Number>(Values::Number(result));
 
-	} else if(lhs->type() == "null" || lhs->type() == "null"){
-			return std::make_shared<Values::Null>(Values::Null());
+	} else if(lhsType == Values::Type::Null || rhsType == Values::Type::Null){
+			return std::make_unique<Values::Null>(Values::Null());
 	} else {
-		string lhsType = lhs->type();
-		string rhsType = rhs->type();
 		string value = "";
-		if((lhsType != "function" || lhsType != "Object") && (rhsType != "function" || rhsType != "Object")){
+		if((lhsType != Values::Type::Function || lhsType != Values::Type::Object) && (rhsType != Values::Type::Function || rhsType != Values::Type::Object)){
 			value.append(lhs->stringValue()).append(rhs->stringValue());
 		} else {
 			value = "null";
 		}
-		return std::make_shared<Values::String>(Values::String(value));
+		return std::make_unique<Values::String>(Values::String(value));
 	}
 
-	return std::make_shared<Values::Null>(Values::Null());
+	return std::make_unique<Values::Null>();
 }

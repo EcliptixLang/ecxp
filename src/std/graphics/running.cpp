@@ -2,7 +2,7 @@
 #include "graphics.hpp"
 
 namespace Graphics {
-    std::shared_ptr<Values::Runtime> running(FunctionCallback* callback){
+    std::unique_ptr<Values::Runtime> running(FunctionCallback* callback){
         return std::make_shared<Values::Boolean>(Values::Boolean(!WindowShouldClose()));
     }
 };

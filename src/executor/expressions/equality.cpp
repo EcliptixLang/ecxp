@@ -3,36 +3,38 @@
 using NodeType = AST::NodeType; 
 using string = std::string;
 
-bool isTruthy(std::shared_ptr<Values::Runtime>& left, Token op, std::shared_ptr<Values::Runtime>& right){
+bool isTruthy(std::unique_ptr<Values::Runtime>& left, Token op, std::unique_ptr<Values::Runtime>& right){
 	std::string oap = op.value;
 	if(oap == "=="){
 		return left->stringValue() == right->stringValue();
 	} else if(oap == "!="){
 		return left->stringValue() != right->stringValue();	
 	} else if(oap == ">="){
-		if(left->type() == "int" && right->type() == "int"){
-			int l = dynamic_cast<Values::Number*>(left.get())->value();
-			int r = dynamic_cast<Values::Number*>(right.get())->value();
+		if(left->type() == Values::Type::Number && right->type() == Values::Type::Number){
+			int l = static_cast<Values::Number*>(left.get())->value();
+			int r = static_cast<Values::Number*>(right.get())->value();
 			return l >= r;
-		} else if (left->type() == "null" || right->type() == "null"){
+		} else if (left->type() == Values::Type::Null || right->type() == Values::Type::Null){
 			return false;
 		} else {
 			return false;
 		}
 	} else if(oap == "<="){
-		if(left->type() == "int" && right->type() == "int"){
-			int l = dynamic_cast<Values::Number*>(left.get())->value();
-			int r = dynamic_cast<Values::Number*>(right.get())->value();
+		if(left->type() == Values::Type::Number && right->type() == Values::Type::Number){
+			int l = static_cast<Values::Number*>(left.get())->value();
+			int r = static_cast<Values::Number*>(right.get())->value();
 			return l <= r;
-		} else if (left->type() == "null" || right->type() == "null"){
+		} else if (left->type() == Values::Type::Null || right->type() == Values::Type::Null){
 			return false;
 		} else {
 			return false;
 		}
-	} else if(oap == "@="){
-		if(left->type() == "array"){
-			std::vector<std::shared_ptr<Values::Runtime>> l = dynamic_cast<Values::Array*>(left.get())->elements();
+	} /*else if(oap == "@="){
+		if(left->type() == Values::Type::Array){
+			Values::Array* arr = static_cast<Values::Array*>(left.get());
+			std::vector<std::unique_ptr<Values::Runtime>> l = arr->elements();
 			for(auto& lol : l){
+				if(lol->type() != right->type()) continue;
 				if(lol->stringValue() == right->stringValue())
 					return true;
 			}
@@ -40,22 +42,22 @@ bool isTruthy(std::shared_ptr<Values::Runtime>& left, Token op, std::shared_ptr<
 		} else {
 			return false;
 		}
-	} else if(oap == "<"){
-		if(left->type() == "int" && right->type() == "int"){
-			int l = dynamic_cast<Values::Number*>(left.get())->value();
-			int r = dynamic_cast<Values::Number*>(right.get())->value();
+	}*/ else if(oap == "<"){
+		if(left->type() == Values::Type::Number && right->type() == Values::Type::Number){
+			int l = static_cast<Values::Number*>(left.get())->value();
+			int r = static_cast<Values::Number*>(right.get())->value();
 			return l < r;
-		} else if (left->type() == "null" || right->type() == "null"){
+		} else if (left->type() == Values::Type::Null || right->type() == Values::Type::Null){
 			return false;
 		} else {
 			return false;
 		}
 	} else if(oap == ">") {
-		if(left->type() == "int" && right->type() == "int"){
-			int l = dynamic_cast<Values::Number*>(left.get())->value();
-			int r = dynamic_cast<Values::Number*>(right.get())->value();
+		if(left->type() == Values::Type::Number && right->type() == Values::Type::Number){
+			int l = static_cast<Values::Number*>(left.get())->value();
+			int r = static_cast<Values::Number*>(right.get())->value();
 			return l > r;
-		} else if (left->type() == "null" || right->type() == "null"){
+		} else if (left->type() == Values::Type::Null || right->type() == Values::Type::Null){
 			return false;
 		} else {
 			return false;
@@ -64,13 +66,13 @@ bool isTruthy(std::shared_ptr<Values::Runtime>& left, Token op, std::shared_ptr<
 	return false;
 }
 
-std::shared_ptr<Values::Runtime> Interpreter::evaluateEqualityExpression(const AST::EqualityCheckExpr& node, std::shared_ptr<Runtime::Environment> &env){
-	std::shared_ptr<Values::Runtime> left = this->evaluate(node.left, env);
-	std::shared_ptr<Values::Runtime> right = this->evaluate(node.right, env);
+std::unique_ptr<Values::Runtime> Interpreter::evaluateEqualityExpression(const AST::EqualityCheckExpr& node, Runtime::Environment& env){
+	std::unique_ptr<Values::Runtime> left = this->evaluate(node.left, env);
+	std::unique_ptr<Values::Runtime> right = this->evaluate(node.right, env);
 
 	if(isTruthy(left, node.operatorToken, right)){
-		return std::make_shared<Values::Boolean>(true);
+		return std::make_unique<Values::Boolean>(true);
 	}
-	else return std::make_shared<Values::Boolean>(false);
+	else return std::make_unique<Values::Boolean>(false);
 
 }

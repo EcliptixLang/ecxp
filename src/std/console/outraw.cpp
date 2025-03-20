@@ -1,3 +1,4 @@
+#define STD_CONSOLE
 #ifdef STD_CONSOLE
 #include "../../values.hpp"
 #include "../../fnvalues.hpp"
@@ -8,8 +9,8 @@ using Values::FunctionCallback;
 using Values::Runtime;
 
 namespace Console {
-    std::shared_ptr<Values::Runtime> outraw(FunctionCallback* callback){
-        auto args = callback->parsedArgs;
+    std::unique_ptr<Values::Runtime> outraw(FunctionCallback* callback){
+        auto args = std::move(callback->parsedArgs);
         std::string value = "";
     
         for(auto& arg : args){

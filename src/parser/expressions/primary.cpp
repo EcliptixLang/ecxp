@@ -8,8 +8,7 @@ PAST Parser::ParsePrimary() {
             case TokenType::Identifier:
 				return std::make_shared<AST::IdentifierExpr>(this->nextToken().value);
 			case TokenType::Number: {
-			    Token numToken = this->nextToken();  // Capture token once
-			    std::cout << lexer.StringifyTokenTypes(numToken.type) << ": " << numToken.value << std::endl;
+			    Token numToken = this->nextToken();
 			    return std::make_shared<AST::NumberLiteral>(std::stod(numToken.value));
 			}
 			case TokenType::Break:

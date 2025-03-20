@@ -3,9 +3,9 @@
 using NodeType = AST::NodeType; 
 using string = std::string;
 
-bool truthy(std::shared_ptr<Values::Runtime>& conditional){
-	if(conditional->type() == "boolean"){
-		Values::Boolean* cond = dynamic_cast<Values::Boolean*>(conditional.get());
+bool truthy(std::unique_ptr<Values::Runtime>& conditional){
+	if(conditional->type() == Values::Type::Boolean){
+		Values::Boolean* cond = static_cast<Values::Boolean*>(conditional.get());
 		const bool boolean = cond->value();
 		if(boolean) return true; 
 		else return false;
@@ -18,30 +18,34 @@ bool truthy(std::shared_ptr<Values::Runtime>& conditional){
 	}
 }
 
-std::shared_ptr<Values::Runtime> Interpreter::evaluateIfStatement(const AST::IfStatement& node, std::shared_ptr<Runtime::Environment> &env){
-	std::shared_ptr<Values::Runtime> val;
-	auto enva = std::make_shared<Runtime::Environment>(env);
-	std::shared_ptr<Values::Runtime> cond = this->evaluate(node.condition, enva);
+std::unique_ptr<Values::Runtime> Interpreter::evaluateIfStatement(const AST::IfStatement& node, Runtime::Environment& env){
+	std::unique_ptr<Values::Runtime> val;
+	env.enter_scope();
+	std::unique_ptr<Values::Runtime> cond = this->evaluate(node.condition, env);
 	if(truthy(cond)){
 		for(auto& thing : node.consequent){
-			val = this->evaluate(thing, enva);
+			val = this->evaluate(thing, env);
 			if(val != nullptr){
-				if (val->type() == "skip"){
-					break;	
+				if (val->type() == Values::Type::Skip){
+					env.leave_scope();
+					return std::make_unique<Values::Null>();
 				}
 			}
 		}
+		env.leave_scope();
 	} else {
 		if(node.alternate.size() > 0){
 			for(auto& thing : node.alternate){
-				val = this->evaluate(thing, enva);
+				val = this->evaluate(thing, env);
 				if(val != nullptr){
-					if (val->type() == "skip"){
-						break;	
+					if (val->type() == Values::Type::Skip){
+						env.leave_scope();
+						return std::make_unique<Values::Null>();	
 					}
 				}
 			}
+			env.leave_scope();
 		}
 	}
-	return std::make_shared<Values::Null>(Values::Null());
+	return std::make_unique<Values::Null>();
 }
